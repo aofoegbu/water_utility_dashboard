@@ -328,13 +328,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const updates = req.body;
       
-      console.log('Maintenance update request:', { id, updates });
-      
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid maintenance task ID" });
       }
       
-      const task = await storage.updateMaintenance(id, updates);
+      // Convert date strings to Date objects for database compatibility
+      const processedUpdates = { ...updates };
+      if (processedUpdates.completedDate && typeof processedUpdates.completedDate === 'string') {
+        processedUpdates.completedDate = new Date(processedUpdates.completedDate);
+      }
+      if (processedUpdates.scheduledDate && typeof processedUpdates.scheduledDate === 'string') {
+        processedUpdates.scheduledDate = new Date(processedUpdates.scheduledDate);
+      }
+      
+      const task = await storage.updateMaintenance(id, processedUpdates);
       
       if (!task) {
         return res.status(404).json({ message: "Maintenance task not found" });

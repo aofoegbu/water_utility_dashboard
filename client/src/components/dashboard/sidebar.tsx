@@ -1,6 +1,7 @@
 import { BarChart3, Droplet, AlertTriangle, Wrench, FileText, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
@@ -13,6 +14,18 @@ const navigation = [
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const { user } = useAuth();
+  
+  // Get user initials for avatar
+  const getInitials = (fullName?: string, username?: string) => {
+    if (fullName) {
+      return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    if (username) {
+      return username.slice(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
   
   return (
     <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
@@ -57,12 +70,18 @@ export default function Sidebar() {
       {/* User Profile */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-600">JA</span>
+          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <span className="text-sm font-medium text-primary-600">
+              {getInitials(user?.fullName, user?.username)}
+            </span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">John Analyst</p>
-            <p className="text-xs text-gray-500">MIS Analyst</p>
+            <p className="text-sm font-medium text-gray-900">
+              {user?.fullName || user?.username || 'User'}
+            </p>
+            <p className="text-xs text-gray-500">
+              {user?.role || 'Analyst'}
+            </p>
           </div>
         </div>
       </div>
