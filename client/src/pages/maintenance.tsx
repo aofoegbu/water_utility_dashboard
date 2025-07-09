@@ -30,6 +30,7 @@ export default function MaintenancePage() {
   const { data: maintenanceData, isLoading } = useQuery({
     queryKey: ["/api/maintenance"],
     refetchInterval: 60000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const addMaintenanceMutation = useMutation({

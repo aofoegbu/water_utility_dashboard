@@ -29,12 +29,14 @@ export default function Dashboard() {
   const { data: kpis, isLoading: kpisLoading, error: kpisError } = useQuery({
     queryKey: ["/api/dashboard/kpis"],
     refetchInterval: 30000, // Refresh every 30 seconds
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const { data: unreadAlerts } = useQuery({
     queryKey: ["/api/alerts"],
     queryFn: () => fetch("/api/alerts?unreadOnly=true").then(res => res.json()),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   if (kpisError) {

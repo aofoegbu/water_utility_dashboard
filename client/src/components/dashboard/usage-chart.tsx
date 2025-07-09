@@ -10,6 +10,7 @@ export default function UsageChart() {
   const { data: chartData, isLoading } = useQuery({
     queryKey: [`/api/water-usage/chart-data/${timeRange}`],
     refetchInterval: 60000, // Refresh every minute
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   if (isLoading) {

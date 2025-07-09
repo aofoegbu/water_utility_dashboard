@@ -12,6 +12,7 @@ export default function MaintenanceSchedule() {
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["/api/maintenance/today"],
     refetchInterval: 60000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const updateTaskMutation = useMutation({

@@ -27,6 +27,7 @@ export default function LeaksPage() {
   const { data: leaksData, isLoading } = useQuery({
     queryKey: ["/api/leaks"],
     refetchInterval: 30000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const addLeakMutation = useMutation({

@@ -26,6 +26,7 @@ export default function WaterUsagePage() {
   const { data: usageData, isLoading } = useQuery({
     queryKey: ["/api/water-usage"],
     refetchInterval: 60000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const addUsageMutation = useMutation({

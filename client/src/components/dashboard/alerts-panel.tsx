@@ -11,6 +11,7 @@ export default function AlertsPanel() {
   const { data: alerts, isLoading } = useQuery({
     queryKey: ["/api/alerts"],
     refetchInterval: 30000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const markAsReadMutation = useMutation({

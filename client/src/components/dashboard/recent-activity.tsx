@@ -9,6 +9,7 @@ export default function RecentActivity() {
   const { data: activities, isLoading } = useQuery({
     queryKey: ["/api/activities"],
     refetchInterval: 30000,
+    refetchIntervalInBackground: false, // Only refresh when tab is active
   });
 
   const getActivityIcon = (eventType: string) => {
