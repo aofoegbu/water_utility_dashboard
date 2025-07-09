@@ -13,6 +13,7 @@ import CustomersPage from "@/pages/customers";
 import TestPage from "@/pages/test";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
+import Chatbot from "@/components/chatbot/chatbot";
 
 function Router() {
   // Always show the dashboard and other pages without authentication
@@ -38,6 +39,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <Chatbot />
       </TooltipProvider>
     </QueryClientProvider>
   );
