@@ -30,7 +30,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax', // Important for development
     },
+    name: 'connect.sid'
   }));
 
   // Authentication middleware
@@ -73,9 +75,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set session
       req.session.user = userWithoutPassword;
       
-      res.status(201).json({ 
-        message: 'User registered successfully',
-        user: userWithoutPassword
+      // Save session explicitly
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        
+        res.status(201).json({ 
+          message: 'User registered successfully',
+          user: userWithoutPassword
+        });
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -108,9 +118,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set session
       req.session.user = userWithoutPassword;
       
-      res.json({ 
-        message: 'Login successful',
-        user: userWithoutPassword
+      // Save session explicitly
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        
+        res.json({ 
+          message: 'Login successful',
+          user: userWithoutPassword
+        });
       });
     } catch (error) {
       console.error('Login error:', error);
