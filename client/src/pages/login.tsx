@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const [showRegister, setShowRegister] = useState(false);
+  const queryClient = useQueryClient();
   
   const {
     register,
@@ -29,7 +30,12 @@ export default function LoginPage() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Invalidate and refetch the user query to update auth state
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Force refetch to ensure auth state is updated
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      // Redirect to home page
       setLocation("/");
     },
   });
@@ -126,6 +132,7 @@ export default function LoginPage() {
 }
 
 function RegisterModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -139,7 +146,12 @@ function RegisterModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Invalidate and refetch the user query to update auth state
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Force refetch to ensure auth state is updated
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      // Call success callback
       onSuccess();
     },
   });
