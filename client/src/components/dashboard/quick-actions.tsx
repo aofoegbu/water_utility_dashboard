@@ -1,12 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Calendar, Activity, Download } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface QuickActionsProps {
   onGenerateReport: () => void;
 }
 
 export default function QuickActions({ onGenerateReport }: QuickActionsProps) {
+  const [, navigate] = useLocation();
+  
   const actions = [
     {
       title: "Generate Daily Report",
@@ -20,21 +23,21 @@ export default function QuickActions({ onGenerateReport }: QuickActionsProps) {
       description: "Add new maintenance task",
       icon: Calendar,
       color: "bg-orange-100 text-orange-600",
-      onClick: () => console.log("Schedule inspection")
+      onClick: () => navigate("/maintenance")
     },
     {
       title: "System Health Check",
       description: "Run diagnostics",
       icon: Activity,
       color: "bg-green-100 text-green-600",
-      onClick: () => console.log("System health check")
+      onClick: () => navigate("/leaks")
     },
     {
       title: "Export Data",
       description: "CSV/Excel format",
       icon: Download,
       color: "bg-purple-100 text-purple-600",
-      onClick: () => console.log("Export data")
+      onClick: () => navigate("/reports")
     }
   ];
 

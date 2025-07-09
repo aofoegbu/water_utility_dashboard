@@ -8,7 +8,7 @@ export default function UsageChart() {
   const [timeRange, setTimeRange] = useState("7D");
 
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ["/api/water-usage/chart-data", timeRange],
+    queryKey: [`/api/water-usage/chart-data/${timeRange}`],
     refetchInterval: 60000, // Refresh every minute
   });
 

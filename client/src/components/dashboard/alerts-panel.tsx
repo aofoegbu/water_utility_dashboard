@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 
 export default function AlertsPanel() {
   const queryClient = useQueryClient();
@@ -75,9 +76,11 @@ export default function AlertsPanel() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Recent Alerts</CardTitle>
-          <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700">
-            View All
-          </Button>
+          <Link href="/leaks">
+            <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700">
+              View All
+            </Button>
+          </Link>
         </div>
       </CardHeader>
       <CardContent>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 
 export default function MaintenanceSchedule() {
   const queryClient = useQueryClient();
@@ -71,10 +72,12 @@ export default function MaintenanceSchedule() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Today's Schedule</CardTitle>
-          <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700">
-            <Plus className="h-4 w-4 mr-1" />
-            Add Task
-          </Button>
+          <Link href="/maintenance">
+            <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700">
+              <Plus className="h-4 w-4 mr-1" />
+              Add Task
+            </Button>
+          </Link>
         </div>
       </CardHeader>
       <CardContent>

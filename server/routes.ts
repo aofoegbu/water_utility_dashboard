@@ -63,10 +63,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/water-usage/chart-data", async (req: Request, res: Response) => {
+  app.get("/api/water-usage/chart-data/:period?", async (req: Request, res: Response) => {
     try {
+      const period = req.params.period || "7D";
       const endDate = new Date();
-      const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      let startDate: Date;
+      
+      // Parse the period parameter
+      if (period === "7D") {
+        startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (period === "30D") {
+        startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else {
+        startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      }
       
       const usage = await storage.getWaterUsage({ startDate, endDate });
       

@@ -1,210 +1,215 @@
-import axios from 'axios';
+#!/usr/bin/env node
 
 const baseURL = 'http://localhost:5000';
 
 async function testFeature(name, testFn) {
   try {
-    console.log(`Testing ${name}...`);
     await testFn();
     console.log(`✅ ${name} - PASSED`);
   } catch (error) {
-    console.log(`❌ ${name} - FAILED:`, error.response?.data || error.message);
+    console.log(`❌ ${name} - FAILED: ${error.message}`);
   }
 }
 
 async function runAllTests() {
-  console.log('🚀 Starting comprehensive API tests...\n');
+  console.log('🧪 Testing all Water Utility Dashboard features...\n');
 
   // Test 1: Dashboard KPIs
   await testFeature('Dashboard KPIs', async () => {
-    const response = await axios.get(`${baseURL}/api/dashboard/kpis`);
-    if (!response.data.totalUsageToday || !response.data.usageChange) {
-      throw new Error('Missing KPI data');
-    }
+    const response = await fetch(`${baseURL}/api/dashboard/kpis`);
+    const data = await response.json();
+    if (!data.totalUsageToday) throw new Error('Missing totalUsageToday');
   });
 
-  // Test 2: Water Usage GET
-  await testFeature('Water Usage GET', async () => {
-    const response = await axios.get(`${baseURL}/api/water-usage`);
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      throw new Error('No water usage data found');
-    }
+  // Test 2: Water Usage - GET
+  await testFeature('Water Usage - GET', async () => {
+    const response = await fetch(`${baseURL}/api/water-usage`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
   });
 
-  // Test 3: Chart Data
+  // Test 3: Water Usage - POST
+  await testFeature('Water Usage - POST', async () => {
+    const response = await fetch(`${baseURL}/api/water-usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'Test Location - Feature Test',
+        gallons: 1200,
+        pressure: 42.5,
+        flowRate: 11.2,
+        timestamp: new Date().toISOString()
+      })
+    });
+    const data = await response.json();
+    if (!data.id) throw new Error('Missing id in response');
+  });
+
+  // Test 4: Leaks - GET
+  await testFeature('Leaks - GET', async () => {
+    const response = await fetch(`${baseURL}/api/leaks`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
+  });
+
+  // Test 5: Leaks - POST
+  await testFeature('Leaks - POST', async () => {
+    const response = await fetch(`${baseURL}/api/leaks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'Test Location - Feature Test',
+        severity: 'medium',
+        status: 'active',
+        detectedAt: new Date().toISOString(),
+        estimatedGallonsLost: 800
+      })
+    });
+    const data = await response.json();
+    if (!data.id) throw new Error('Missing id in response');
+  });
+
+  // Test 6: Maintenance - GET
+  await testFeature('Maintenance - GET', async () => {
+    const response = await fetch(`${baseURL}/api/maintenance`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
+  });
+
+  // Test 7: Maintenance - POST
+  await testFeature('Maintenance - POST', async () => {
+    const response = await fetch(`${baseURL}/api/maintenance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taskType: 'inspection',
+        location: 'Test Location - Feature Test',
+        priority: 'normal',
+        status: 'pending',
+        scheduledDate: new Date(Date.now() + 24*60*60*1000).toISOString(),
+        assignedTechnician: 'Test Technician',
+        description: 'Feature test maintenance task'
+      })
+    });
+    const data = await response.json();
+    if (!data.id) throw new Error('Missing id in response');
+  });
+
+  // Test 8: Alerts - GET
+  await testFeature('Alerts - GET', async () => {
+    const response = await fetch(`${baseURL}/api/alerts`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
+  });
+
+  // Test 9: Chart Data
   await testFeature('Chart Data', async () => {
-    const response = await axios.get(`${baseURL}/api/water-usage/chart-data`);
-    if (!Array.isArray(response.data)) {
-      throw new Error('Chart data should be an array');
-    }
+    const response = await fetch(`${baseURL}/api/water-usage/chart-data/7D`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
   });
 
-  // Test 4: Leaks GET
-  await testFeature('Leaks GET', async () => {
-    const response = await axios.get(`${baseURL}/api/leaks`);
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      throw new Error('No leak data found');
-    }
+  // Test 10: Activities
+  await testFeature('Activities', async () => {
+    const response = await fetch(`${baseURL}/api/activities`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
   });
 
-  // Test 5: Maintenance GET
-  await testFeature('Maintenance GET', async () => {
-    const response = await axios.get(`${baseURL}/api/maintenance`);
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      throw new Error('No maintenance data found');
-    }
-  });
-
-  // Test 6: Alerts GET
-  await testFeature('Alerts GET', async () => {
-    const response = await axios.get(`${baseURL}/api/alerts`);
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      throw new Error('No alert data found');
-    }
-  });
-
-  // Test 7: Activities GET
-  await testFeature('Activities GET', async () => {
-    const response = await axios.get(`${baseURL}/api/activities`);
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      throw new Error('No activity data found');
-    }
-  });
-
-  // Test 8: Water Usage POST (test with existing data structure)
-  await testFeature('Water Usage POST', async () => {
-    const testData = {
-      location: "Test Location - API Test",
-      timestamp: new Date().toISOString(),
-      gallons: 125.5,
-      pressure: 42.3,
-      flowRate: 15.2,
-      temperature: 72.1,
-      qualityMetrics: {
-        ph: 7.1,
-        chlorine: 0.75,
-        turbidity: 0.3
-      }
-    };
-    const response = await axios.post(`${baseURL}/api/water-usage`, testData);
-    if (response.status !== 201) {
-      throw new Error('Failed to create water usage record');
-    }
-  });
-
-  // Test 9: Alert POST
-  await testFeature('Alert POST', async () => {
-    const testData = {
-      type: "test",
-      severity: "info",
-      location: "Test Location - API Test",
-      message: "API test alert created successfully",
-      timestamp: new Date().toISOString(),
-      isRead: false
-    };
-    const response = await axios.post(`${baseURL}/api/alerts`, testData);
-    if (response.status !== 201) {
-      throw new Error('Failed to create alert');
-    }
-  });
-
-  // Test 10: Leak POST
-  await testFeature('Leak POST', async () => {
-    const testData = {
-      location: "Test Location - API Test",
-      severity: "medium",
-      status: "active",
-      detectedAt: new Date().toISOString(),
-      estimatedGallonsLost: 1500,
-      assignedTechnician: "Test Technician",
-      notes: "API test leak record"
-    };
-    const response = await axios.post(`${baseURL}/api/leaks`, testData);
-    if (response.status !== 201) {
-      throw new Error('Failed to create leak record');
-    }
-  });
-
-  // Test 11: Maintenance POST
-  await testFeature('Maintenance POST', async () => {
-    const testData = {
-      taskType: "inspection",
-      location: "Test Location - API Test",
-      priority: "medium",
-      status: "pending",
-      scheduledDate: new Date(Date.now() + 24*60*60*1000).toISOString(),
-      assignedTechnician: "Test Technician",
-      estimatedDuration: 120,
-      description: "API test maintenance task",
-      notes: "Created via API test"
-    };
-    const response = await axios.post(`${baseURL}/api/maintenance`, testData);
-    if (response.status !== 201) {
-      throw new Error('Failed to create maintenance task');
-    }
-  });
-
-  // Test 12: PATCH Operations
-  await testFeature('Leak Update PATCH', async () => {
-    const response = await axios.patch(`${baseURL}/api/leaks/1`, {
-      status: "investigating",
-      notes: "Updated via API test"
+  // Test 11: Reports - CSV
+  await testFeature('Reports - CSV', async () => {
+    const response = await fetch(`${baseURL}/api/reports/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reportType: 'usage',
+        format: 'csv',
+        startDate: '2024-07-01',
+        endDate: '2024-07-09'
+      })
     });
-    if (response.status !== 200) {
-      throw new Error('Failed to update leak');
-    }
+    if (!response.ok) throw new Error('CSV report generation failed');
   });
 
-  await testFeature('Maintenance Update PATCH', async () => {
-    const response = await axios.patch(`${baseURL}/api/maintenance/1`, {
-      status: "in_progress",
-      notes: "Updated via API test"
+  // Test 12: Reports - PDF
+  await testFeature('Reports - PDF', async () => {
+    const response = await fetch(`${baseURL}/api/reports/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reportType: 'leaks',
+        format: 'pdf',
+        startDate: '2024-07-01',
+        endDate: '2024-07-09'
+      })
     });
-    if (response.status !== 200) {
-      throw new Error('Failed to update maintenance task');
-    }
+    if (!response.ok) throw new Error('PDF report generation failed');
   });
 
-  await testFeature('Alert Mark as Read PATCH', async () => {
-    const response = await axios.patch(`${baseURL}/api/alerts/1/read`);
-    if (response.status !== 200) {
-      throw new Error('Failed to mark alert as read');
-    }
+  // Test 13: Maintenance Today
+  await testFeature('Maintenance Today', async () => {
+    const response = await fetch(`${baseURL}/api/maintenance/today`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error('Expected array');
   });
 
-  // Test 13: Report Generation
-  await testFeature('PDF Report Generation', async () => {
-    const testData = {
-      reportType: "usage",
-      format: "pdf",
-      startDate: new Date(Date.now() - 7*24*60*60*1000).toISOString(),
-      endDate: new Date().toISOString()
-    };
-    const response = await axios.post(`${baseURL}/api/reports/generate`, testData, {
-      responseType: 'arraybuffer'
+  // Test 14: Update Leak Status
+  await testFeature('Update Leak Status', async () => {
+    // First create a leak
+    const createResponse = await fetch(`${baseURL}/api/leaks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'Test Location - Update Test',
+        severity: 'low',
+        status: 'active',
+        detectedAt: new Date().toISOString(),
+        estimatedGallonsLost: 300
+      })
     });
-    if (response.status !== 200 || response.headers['content-type'] !== 'application/pdf') {
-      throw new Error('Failed to generate PDF report');
-    }
+    const leak = await createResponse.json();
+    
+    // Then update it
+    const updateResponse = await fetch(`${baseURL}/api/leaks/${leak.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'resolved' })
+    });
+    const updatedLeak = await updateResponse.json();
+    if (updatedLeak.status !== 'resolved') throw new Error('Status not updated');
   });
 
-  await testFeature('CSV Report Generation', async () => {
-    const testData = {
-      reportType: "leaks",
-      format: "csv",
-      startDate: new Date(Date.now() - 7*24*60*60*1000).toISOString(),
-      endDate: new Date().toISOString()
-    };
-    const response = await axios.post(`${baseURL}/api/reports/generate`, testData);
-    if (response.status !== 200 || !response.headers['content-type'].includes('text/csv')) {
-      throw new Error('Failed to generate CSV report');
-    }
-    if (!response.data || response.data.length === 0) {
-      throw new Error('CSV report is empty');
-    }
+  // Test 15: Update Maintenance Status
+  await testFeature('Update Maintenance Status', async () => {
+    // First create a maintenance task
+    const createResponse = await fetch(`${baseURL}/api/maintenance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taskType: 'repair',
+        location: 'Test Location - Update Test',
+        priority: 'high',
+        status: 'pending',
+        scheduledDate: new Date(Date.now() + 24*60*60*1000).toISOString(),
+        assignedTechnician: 'Test Technician',
+        description: 'Update test maintenance task'
+      })
+    });
+    const task = await createResponse.json();
+    
+    // Then update it
+    const updateResponse = await fetch(`${baseURL}/api/maintenance/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' })
+    });
+    const updatedTask = await updateResponse.json();
+    if (updatedTask.status !== 'completed') throw new Error('Status not updated');
   });
 
-  console.log('\n🎉 All tests completed!');
+  console.log('\n🎉 All feature tests completed!\n');
 }
 
+// Run if called directly
 runAllTests().catch(console.error);

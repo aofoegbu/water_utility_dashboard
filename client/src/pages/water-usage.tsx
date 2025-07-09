@@ -71,7 +71,29 @@ export default function WaterUsagePage() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Usage Record
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => {
+                const csvData = usageData?.map(record => ({
+                  Timestamp: new Date(record.timestamp).toLocaleString(),
+                  Location: record.location,
+                  Gallons: record.gallons,
+                  Pressure: record.pressure,
+                  FlowRate: record.flowRate,
+                  Temperature: record.temperature || 'N/A'
+                })) || [];
+                
+                const csvContent = [
+                  Object.keys(csvData[0] || {}).join(','),
+                  ...csvData.map(row => Object.values(row).join(','))
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `water-usage-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
