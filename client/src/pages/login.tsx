@@ -31,9 +31,10 @@ export default function LoginPage() {
       return response.json();
     },
     onSuccess: async () => {
+      // Wait a moment for session to be properly set
+      await new Promise(resolve => setTimeout(resolve, 100));
       // Invalidate and refetch the user query to update auth state
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      // Force refetch to ensure auth state is updated
       await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       // Redirect to home page
       setLocation("/");
@@ -121,7 +122,11 @@ export default function LoginPage() {
       {showRegister && (
         <RegisterModal
           onClose={() => setShowRegister(false)}
-          onSuccess={() => {
+          onSuccess={async () => {
+            // Wait a moment for session to be properly set
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+            await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
             setShowRegister(false);
             setLocation("/");
           }}
@@ -147,9 +152,10 @@ function RegisterModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
       return response.json();
     },
     onSuccess: async () => {
+      // Wait a moment for session to be properly set
+      await new Promise(resolve => setTimeout(resolve, 100));
       // Invalidate and refetch the user query to update auth state
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      // Force refetch to ensure auth state is updated
       await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       // Call success callback
       onSuccess();
