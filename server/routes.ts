@@ -58,7 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usage = await storage.createWaterUsage(validatedData);
       res.status(201).json(usage);
     } catch (error) {
-      res.status(400).json({ message: "Invalid water usage data" });
+      console.error("Water usage validation error:", error);
+      res.status(400).json({ message: "Invalid water usage data", details: error instanceof Error ? error.message : error });
     }
   });
 
@@ -105,7 +106,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leak = await storage.createLeak(validatedData);
       res.status(201).json(leak);
     } catch (error) {
-      res.status(400).json({ message: "Invalid leak data" });
+      console.error("Leak validation error:", error);
+      res.status(400).json({ message: "Invalid leak data", details: error instanceof Error ? error.message : error });
     }
   });
 
@@ -156,7 +158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const task = await storage.createMaintenance(validatedData);
       res.status(201).json(task);
     } catch (error) {
-      res.status(400).json({ message: "Invalid maintenance data" });
+      console.error("Maintenance validation error:", error);
+      res.status(400).json({ message: "Invalid maintenance data", details: error instanceof Error ? error.message : error });
     }
   });
 
@@ -193,7 +196,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const alert = await storage.createAlert(validatedData);
       res.status(201).json(alert);
     } catch (error) {
-      res.status(400).json({ message: "Invalid alert data" });
+      console.error("Alert validation error:", error);
+      res.status(400).json({ message: "Invalid alert data", details: error instanceof Error ? error.message : error });
     }
   });
 

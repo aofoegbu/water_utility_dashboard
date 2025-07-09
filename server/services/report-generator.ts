@@ -69,14 +69,8 @@ export async function generateCSVReport(
   let csv = '';
 
   switch (reportType) {
+    case 'usage':
     case 'daily-operations':
-      csv = 'Date,Total Usage (Gallons),Average Pressure (PSI),Active Leaks,Pending Maintenance\n';
-      const kpis = await storage.getUsageStatistics();
-      const activeLeaks = await storage.getActiveLeaksCount();
-      const pendingMaintenance = await storage.getPendingMaintenanceCount();
-      csv += `${new Date().toLocaleDateString()},${kpis.totalToday},${kpis.averagePressure},${activeLeaks},${pendingMaintenance}\n`;
-      break;
-      
     case 'weekly-usage':
       csv = 'Date,Location,Gallons,Pressure (PSI),Flow Rate (GPM),Temperature (F)\n';
       const usage = await storage.getWaterUsage({ startDate, endDate });
@@ -85,6 +79,16 @@ export async function generateCSVReport(
       });
       break;
       
+    case 'leaks':
+    case 'leak-analysis':
+      csv = 'Detected Date,Location,Severity,Status,Estimated Loss (Gallons),Technician,Notes\n';
+      const leaks = await storage.getLeaks();
+      leaks.forEach(l => {
+        csv += `${l.detectedAt.toISOString()},${l.location},${l.severity},${l.status},${l.estimatedGallonsLost || 'N/A'},${l.assignedTechnician || 'N/A'},"${l.notes || ''}"\n`;
+      });
+      break;
+      
+    case 'maintenance':
     case 'maintenance-log':
       csv = 'Scheduled Date,Task Type,Location,Priority,Status,Technician,Description,Cost\n';
       const maintenance = await storage.getMaintenance();
@@ -92,12 +96,21 @@ export async function generateCSVReport(
         csv += `${m.scheduledDate.toISOString()},${m.taskType},${m.location},${m.priority},${m.status},${m.assignedTechnician},${m.description},${m.cost || 'N/A'}\n`;
       });
       break;
-      
-    case 'leak-analysis':
-      csv = 'Detected Date,Location,Severity,Status,Estimated Loss (Gallons),Technician,Notes\n';
-      const leaks = await storage.getLeaks();
-      leaks.forEach(l => {
-        csv += `${l.detectedAt.toISOString()},${l.location},${l.severity},${l.status},${l.estimatedGallonsLost || 'N/A'},${l.assignedTechnician || 'N/A'},"${l.notes || ''}"\n`;
+
+    case 'alerts':
+      csv = 'Timestamp,Type,Severity,Location,Message,Status\n';
+      const alerts = await storage.getAlerts();
+      alerts.forEach(a => {
+        csv += `${a.timestamp.toISOString()},${a.type},${a.severity},${a.location},"${a.message}",${a.isRead ? 'Read' : 'Unread'}\n`;
+      });
+      break;
+
+    default:
+      // Default to usage data
+      csv = 'Date,Location,Gallons,Pressure (PSI),Flow Rate (GPM),Temperature (F)\n';
+      const defaultUsage = await storage.getWaterUsage({ startDate, endDate });
+      defaultUsage.forEach(u => {
+        csv += `${u.timestamp.toISOString()},${u.location},${u.gallons},${u.pressure},${u.flowRate},${u.temperature || 'N/A'}\n`;
       });
       break;
   }

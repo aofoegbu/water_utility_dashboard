@@ -77,13 +77,26 @@ export const activities = pgTable("activities", {
   details: text("details"),
 });
 
-// Create insert schemas
+// Create insert schemas with string dates that will be converted to Date objects
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
-export const insertWaterUsageSchema = createInsertSchema(waterUsage).omit({ id: true });
-export const insertLeakSchema = createInsertSchema(leaks).omit({ id: true });
-export const insertMaintenanceSchema = createInsertSchema(maintenance).omit({ id: true });
-export const insertAlertSchema = createInsertSchema(alerts).omit({ id: true });
-export const insertActivitySchema = createInsertSchema(activities).omit({ id: true });
+export const insertWaterUsageSchema = createInsertSchema(waterUsage).omit({ id: true }).extend({
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
+});
+export const insertLeakSchema = createInsertSchema(leaks).omit({ id: true }).extend({
+  detectedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  resolvedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+});
+export const insertMaintenanceSchema = createInsertSchema(maintenance).omit({ id: true }).extend({
+  scheduledDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  completedDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+});
+export const insertAlertSchema = createInsertSchema(alerts).omit({ id: true }).extend({
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  resolvedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+});
+export const insertActivitySchema = createInsertSchema(activities).omit({ id: true }).extend({
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
+});
 
 // Export types
 export type User = typeof users.$inferSelect;
