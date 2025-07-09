@@ -16,7 +16,7 @@ User interface: Display user's full name everywhere, capitalize job titles.
 - **Skills Demonstrated**: Dashboard development, data visualization, real-time monitoring, authentication systems
 - **Port**: 5000 (main application)
 - **Status**: ✓ Complete with full authentication, user management, interactive maintenance scheduling, and real-time dashboard features
-- **Recent Updates**: Authentication system fully implemented with session management, maintenance task completion tracking, and personalized user interface
+- **Recent Updates**: Dashboard now displays by default with demo user data (Augustine Ogelo), authentication optional, maintenance task completion tracking, and personalized user interface
 
 ### Project 2: ERP/CRM Mock Integration Tool  
 - **Purpose**: Demonstrates integration between CRM and ERP systems via mock APIs

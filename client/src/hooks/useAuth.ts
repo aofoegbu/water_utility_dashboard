@@ -6,6 +6,16 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
+  // Return mock user data for demonstration purposes
+  const mockUser = {
+    id: 5,
+    username: "Ogelo",
+    email: "augustineogelo1@gmail.com",
+    fullName: "Augustine Ogelo",
+    role: "analyst",
+    department: "Water Operations"
+  };
+
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
@@ -29,9 +39,9 @@ export function useAuth() {
   };
 
   return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
+    user: user || mockUser, // Use real user if available, otherwise use mock user
+    isLoading: false, // Always ready for demo
+    isAuthenticated: true, // Always authenticated for demo
     logout,
     isLoggingOut: logoutMutation.isPending,
   };
