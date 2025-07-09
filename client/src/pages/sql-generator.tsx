@@ -10,13 +10,30 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Download, Database, BarChart, FileText, Code } from "lucide-react";
+import { Play, Download, Database, BarChart, FileText, Code, Plus, Minus, Settings } from "lucide-react";
 
 interface QueryResult {
   columns: string[];
   rows: any[];
   rowCount: number;
   executionTime: number;
+}
+
+interface QueryCondition {
+  id: string;
+  field: string;
+  operator: string;
+  value: string;
+  connector: 'AND' | 'OR';
+}
+
+interface QueryBuilder {
+  table: string;
+  selectedFields: string[];
+  conditions: QueryCondition[];
+  groupBy: string[];
+  orderBy: { field: string; direction: 'ASC' | 'DESC' }[];
+  limit: number | null;
 }
 
 const SAMPLE_QUERIES = {
@@ -75,11 +92,130 @@ GROUP BY type, severity
 ORDER BY alert_count DESC;`
 };
 
+const DATABASE_TABLES = {
+  water_usage: {
+    label: "Water Usage",
+    fields: {
+      id: { label: "ID", type: "number" },
+      location: { label: "Location", type: "text" },
+      timestamp: { label: "Timestamp", type: "datetime" },
+      gallons: { label: "Gallons", type: "number" },
+      pressure: { label: "Pressure", type: "number" },
+      flow_rate: { label: "Flow Rate", type: "number" },
+      temperature: { label: "Temperature", type: "number" },
+      quality_metrics: { label: "Quality Metrics", type: "text" }
+    }
+  },
+  leaks: {
+    label: "Leaks",
+    fields: {
+      id: { label: "ID", type: "number" },
+      location: { label: "Location", type: "text" },
+      severity: { label: "Severity", type: "text" },
+      status: { label: "Status", type: "text" },
+      detected_at: { label: "Detected At", type: "datetime" },
+      resolved_at: { label: "Resolved At", type: "datetime" },
+      estimated_gallons_lost: { label: "Estimated Gallons Lost", type: "number" },
+      assigned_technician: { label: "Assigned Technician", type: "text" },
+      notes: { label: "Notes", type: "text" }
+    }
+  },
+  maintenance: {
+    label: "Maintenance",
+    fields: {
+      id: { label: "ID", type: "number" },
+      location: { label: "Location", type: "text" },
+      status: { label: "Status", type: "text" },
+      assigned_technician: { label: "Assigned Technician", type: "text" },
+      notes: { label: "Notes", type: "text" },
+      task_type: { label: "Task Type", type: "text" },
+      priority: { label: "Priority", type: "text" },
+      scheduled_date: { label: "Scheduled Date", type: "datetime" },
+      completed_date: { label: "Completed Date", type: "datetime" },
+      estimated_duration: { label: "Estimated Duration", type: "number" },
+      description: { label: "Description", type: "text" },
+      cost: { label: "Cost", type: "number" }
+    }
+  },
+  alerts: {
+    label: "Alerts",
+    fields: {
+      id: { label: "ID", type: "number" },
+      location: { label: "Location", type: "text" },
+      timestamp: { label: "Timestamp", type: "datetime" },
+      severity: { label: "Severity", type: "text" },
+      resolved_at: { label: "Resolved At", type: "datetime" },
+      type: { label: "Type", type: "text" },
+      message: { label: "Message", type: "text" },
+      is_read: { label: "Is Read", type: "boolean" }
+    }
+  },
+  users: {
+    label: "Users",
+    fields: {
+      id: { label: "ID", type: "number" },
+      username: { label: "Username", type: "text" },
+      role: { label: "Role", type: "text" },
+      full_name: { label: "Full Name", type: "text" },
+      department: { label: "Department", type: "text" },
+      created_at: { label: "Created At", type: "datetime" },
+      email: { label: "Email", type: "text" }
+    }
+  }
+};
+
+const OPERATORS = {
+  text: [
+    { value: "=", label: "equals" },
+    { value: "!=", label: "not equals" },
+    { value: "LIKE", label: "contains" },
+    { value: "NOT LIKE", label: "does not contain" },
+    { value: "IS NULL", label: "is empty" },
+    { value: "IS NOT NULL", label: "is not empty" }
+  ],
+  number: [
+    { value: "=", label: "equals" },
+    { value: "!=", label: "not equals" },
+    { value: ">", label: "greater than" },
+    { value: ">=", label: "greater than or equal" },
+    { value: "<", label: "less than" },
+    { value: "<=", label: "less than or equal" },
+    { value: "IS NULL", label: "is empty" },
+    { value: "IS NOT NULL", label: "is not empty" }
+  ],
+  datetime: [
+    { value: "=", label: "equals" },
+    { value: "!=", label: "not equals" },
+    { value: ">", label: "after" },
+    { value: ">=", label: "on or after" },
+    { value: "<", label: "before" },
+    { value: "<=", label: "on or before" },
+    { value: "IS NULL", label: "is empty" },
+    { value: "IS NOT NULL", label: "is not empty" }
+  ],
+  boolean: [
+    { value: "=", label: "equals" },
+    { value: "!=", label: "not equals" },
+    { value: "IS NULL", label: "is empty" },
+    { value: "IS NOT NULL", label: "is not empty" }
+  ]
+};
+
 export default function SqlGenerator() {
-  const [activeTab, setActiveTab] = useState("editor");
+  const [activeTab, setActiveTab] = useState("builder");
   const [sql, setSql] = useState("");
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
+  
+  // Query Builder State
+  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>({
+    table: "",
+    selectedFields: [],
+    conditions: [],
+    groupBy: [],
+    orderBy: [],
+    limit: null
+  });
   
   const { toast } = useToast();
 
@@ -135,6 +271,112 @@ export default function SqlGenerator() {
 
   const handleTemplateSelect = (queryName: string) => {
     setSql(SAMPLE_QUERIES[queryName as keyof typeof SAMPLE_QUERIES] || "");
+  };
+
+  // Query Builder Functions
+  const generateSQLFromBuilder = () => {
+    if (!queryBuilder.table || queryBuilder.selectedFields.length === 0) {
+      return "";
+    }
+
+    let query = "SELECT ";
+    
+    // Add selected fields
+    if (queryBuilder.selectedFields.includes("*")) {
+      query += "*";
+    } else {
+      query += queryBuilder.selectedFields.join(", ");
+    }
+    
+    query += ` FROM ${queryBuilder.table}`;
+    
+    // Add WHERE conditions
+    if (queryBuilder.conditions.length > 0) {
+      query += " WHERE ";
+      queryBuilder.conditions.forEach((condition, index) => {
+        if (index > 0) {
+          query += ` ${condition.connector} `;
+        }
+        
+        if (condition.operator === "LIKE" || condition.operator === "NOT LIKE") {
+          query += `${condition.field} ${condition.operator} '%${condition.value}%'`;
+        } else if (condition.operator === "IS NULL" || condition.operator === "IS NOT NULL") {
+          query += `${condition.field} ${condition.operator}`;
+        } else {
+          const fieldType = DATABASE_TABLES[queryBuilder.table as keyof typeof DATABASE_TABLES]?.fields[condition.field]?.type;
+          if (fieldType === "text" || fieldType === "datetime") {
+            query += `${condition.field} ${condition.operator} '${condition.value}'`;
+          } else {
+            query += `${condition.field} ${condition.operator} ${condition.value}`;
+          }
+        }
+      });
+    }
+    
+    // Add GROUP BY
+    if (queryBuilder.groupBy.length > 0) {
+      query += ` GROUP BY ${queryBuilder.groupBy.join(", ")}`;
+    }
+    
+    // Add ORDER BY
+    if (queryBuilder.orderBy.length > 0) {
+      query += " ORDER BY ";
+      queryBuilder.orderBy.forEach((order, index) => {
+        if (index > 0) query += ", ";
+        query += `${order.field} ${order.direction}`;
+      });
+    }
+    
+    // Add LIMIT
+    if (queryBuilder.limit && queryBuilder.limit > 0) {
+      query += ` LIMIT ${queryBuilder.limit}`;
+    }
+    
+    return query;
+  };
+
+  const addCondition = () => {
+    const newCondition: QueryCondition = {
+      id: Math.random().toString(36).substring(7),
+      field: "",
+      operator: "=",
+      value: "",
+      connector: "AND"
+    };
+    setQueryBuilder(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, newCondition]
+    }));
+  };
+
+  const updateCondition = (id: string, updates: Partial<QueryCondition>) => {
+    setQueryBuilder(prev => ({
+      ...prev,
+      conditions: prev.conditions.map(condition =>
+        condition.id === id ? { ...condition, ...updates } : condition
+      )
+    }));
+  };
+
+  const removeCondition = (id: string) => {
+    setQueryBuilder(prev => ({
+      ...prev,
+      conditions: prev.conditions.filter(condition => condition.id !== id)
+    }));
+  };
+
+  const executeBuilderQuery = () => {
+    const generatedSQL = generateSQLFromBuilder();
+    if (generatedSQL) {
+      setSql(generatedSQL);
+      setActiveTab("editor");
+      // Auto-execute the query
+      setTimeout(() => {
+        setIsExecuting(true);
+        executeSqlMutation.mutate(generatedSQL);
+        setIsExecuting(false);
+      }, 100);
+    }
   };
 
   const handleExport = async (format: 'csv' | 'json') => {
@@ -206,11 +448,259 @@ export default function SqlGenerator() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="builder">Query Builder</TabsTrigger>
           <TabsTrigger value="editor">Query Editor</TabsTrigger>
           <TabsTrigger value="templates">Sample Queries</TabsTrigger>
           <TabsTrigger value="schema">Database Schema</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="builder" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Visual Query Builder
+                  </CardTitle>
+                  <CardDescription>
+                    Build SQL queries using a visual interface - perfect for non-technical users
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Table Selection */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Data Source</label>
+                    <Select
+                      value={queryBuilder.table}
+                      onValueChange={(value) => setQueryBuilder(prev => ({ 
+                        ...prev, 
+                        table: value, 
+                        selectedFields: [],
+                        conditions: [],
+                        groupBy: [],
+                        orderBy: []
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a table..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(DATABASE_TABLES).map(([key, table]) => (
+                          <SelectItem key={key} value={key}>
+                            {table.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {queryBuilder.table && (
+                    <>
+                      {/* Field Selection */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Select Fields</label>
+                        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded p-2">
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={queryBuilder.selectedFields.includes("*")}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setQueryBuilder(prev => ({ ...prev, selectedFields: ["*"] }));
+                                } else {
+                                  setQueryBuilder(prev => ({ ...prev, selectedFields: [] }));
+                                }
+                              }}
+                            />
+                            <span className="text-sm font-medium">All Fields (*)</span>
+                          </label>
+                          {!queryBuilder.selectedFields.includes("*") && 
+                            Object.entries(DATABASE_TABLES[queryBuilder.table as keyof typeof DATABASE_TABLES].fields).map(([fieldKey, field]) => (
+                              <label key={fieldKey} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={queryBuilder.selectedFields.includes(fieldKey)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setQueryBuilder(prev => ({ 
+                                        ...prev, 
+                                        selectedFields: [...prev.selectedFields, fieldKey] 
+                                      }));
+                                    } else {
+                                      setQueryBuilder(prev => ({ 
+                                        ...prev, 
+                                        selectedFields: prev.selectedFields.filter(f => f !== fieldKey) 
+                                      }));
+                                    }
+                                  }}
+                                />
+                                <span className="text-sm">{field.label}</span>
+                              </label>
+                            ))
+                          }
+                        </div>
+                      </div>
+
+                      {/* Conditions */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-sm font-medium">Filters (WHERE)</label>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={addCondition}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Filter
+                          </Button>
+                        </div>
+                        
+                        {queryBuilder.conditions.map((condition, index) => (
+                          <div key={condition.id} className="flex items-center gap-2 p-3 border rounded mb-2">
+                            {index > 0 && (
+                              <Select
+                                value={condition.connector}
+                                onValueChange={(value: 'AND' | 'OR') => updateCondition(condition.id, { connector: value })}
+                              >
+                                <SelectTrigger className="w-20">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="AND">AND</SelectItem>
+                                  <SelectItem value="OR">OR</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                            
+                            <Select
+                              value={condition.field}
+                              onValueChange={(value) => updateCondition(condition.id, { field: value, operator: "=" })}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Field..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.entries(DATABASE_TABLES[queryBuilder.table as keyof typeof DATABASE_TABLES].fields).map(([fieldKey, field]) => (
+                                  <SelectItem key={fieldKey} value={fieldKey}>
+                                    {field.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
+                            {condition.field && (
+                              <Select
+                                value={condition.operator}
+                                onValueChange={(value) => updateCondition(condition.id, { operator: value })}
+                              >
+                                <SelectTrigger className="flex-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {OPERATORS[DATABASE_TABLES[queryBuilder.table as keyof typeof DATABASE_TABLES].fields[condition.field]?.type as keyof typeof OPERATORS]?.map((op) => (
+                                    <SelectItem key={op.value} value={op.value}>
+                                      {op.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+
+                            {condition.field && !["IS NULL", "IS NOT NULL"].includes(condition.operator) && (
+                              <Input
+                                placeholder="Value..."
+                                value={condition.value}
+                                onChange={(e) => updateCondition(condition.id, { value: e.target.value })}
+                                className="flex-1"
+                              />
+                            )}
+
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeCondition(condition.id)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Limit */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Limit Results</label>
+                        <Input
+                          type="number"
+                          placeholder="No limit"
+                          value={queryBuilder.limit || ""}
+                          onChange={(e) => setQueryBuilder(prev => ({ 
+                            ...prev, 
+                            limit: e.target.value ? parseInt(e.target.value) : null 
+                          }))}
+                          className="w-32"
+                        />
+                      </div>
+
+                      {/* Execute Button */}
+                      <Button
+                        onClick={executeBuilderQuery}
+                        disabled={queryBuilder.selectedFields.length === 0 || isExecuting}
+                        className="w-full"
+                        size="lg"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Build & Execute Query
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Preview Panel */}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Code className="h-5 w-5" />
+                    SQL Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <pre className="text-xs bg-muted p-3 rounded overflow-x-auto min-h-[100px]">
+                    {generateSQLFromBuilder() || "Configure your query using the options on the left"}
+                  </pre>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Tips</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                    <span>Start by selecting a data source</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                    <span>Choose which fields to display</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                    <span>Add filters to narrow results</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                    <span>Set a limit to control output size</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
 
         <TabsContent value="editor" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
