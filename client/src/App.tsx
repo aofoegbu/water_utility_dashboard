@@ -10,6 +10,7 @@ import LeaksPage from "@/pages/leaks";
 import MaintenancePage from "@/pages/maintenance";
 import ReportsPage from "@/pages/reports";
 import CustomersPage from "@/pages/customers";
+import ProjectsPage from "@/pages/projects";
 import TestPage from "@/pages/test";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/maintenance" component={MaintenancePage} />
       <Route path="/reports" component={ReportsPage} />
       <Route path="/customers" component={CustomersPage} />
+      <Route path="/projects" component={ProjectsPage} />
       <Route path="/test" component={TestPage} />
       <Route path="/login" component={LoginPage} />
       <Route component={NotFound} />

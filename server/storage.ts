@@ -1,8 +1,13 @@
 import { 
   users, waterUsage, leaks, maintenance, alerts, activities,
+  projects, requirements, testCases, uatSessions, stakeholders, riskAssessments, costEstimates,
   type User, type InsertUser, type WaterUsage, type InsertWaterUsage,
   type Leak, type InsertLeak, type Maintenance, type InsertMaintenance,
-  type Alert, type InsertAlert, type Activity, type InsertActivity
+  type Alert, type InsertAlert, type Activity, type InsertActivity,
+  type Project, type InsertProject, type Requirement, type InsertRequirement,
+  type TestCase, type InsertTestCase, type UatSession, type InsertUatSession,
+  type Stakeholder, type InsertStakeholder, type RiskAssessment, type InsertRiskAssessment,
+  type CostEstimate, type InsertCostEstimate
 } from "@shared/schema";
 
 export interface IStorage {
@@ -44,6 +49,51 @@ export interface IStorage {
   // Activities
   getRecentActivities(limit?: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
+  
+  // Project management
+  getProjects(): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
+  getProjectByProjectId(projectId: string): Promise<Project | undefined>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined>;
+  
+  // Requirements
+  getRequirements(projectId?: string): Promise<Requirement[]>;
+  getRequirement(id: number): Promise<Requirement | undefined>;
+  createRequirement(requirement: InsertRequirement): Promise<Requirement>;
+  updateRequirement(id: number, updates: Partial<Requirement>): Promise<Requirement | undefined>;
+  
+  // Test cases
+  getTestCases(projectId?: string, requirementId?: string): Promise<TestCase[]>;
+  getTestCase(id: number): Promise<TestCase | undefined>;
+  createTestCase(testCase: InsertTestCase): Promise<TestCase>;
+  updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase | undefined>;
+  
+  // UAT sessions
+  getUatSessions(projectId?: string): Promise<UatSession[]>;
+  getUatSession(id: number): Promise<UatSession | undefined>;
+  createUatSession(session: InsertUatSession): Promise<UatSession>;
+  updateUatSession(id: number, updates: Partial<UatSession>): Promise<UatSession | undefined>;
+  
+  // Stakeholders
+  getStakeholders(projectId?: string): Promise<Stakeholder[]>;
+  createStakeholder(stakeholder: InsertStakeholder): Promise<Stakeholder>;
+  updateStakeholder(id: number, updates: Partial<Stakeholder>): Promise<Stakeholder | undefined>;
+  
+  // Risk assessments
+  getRiskAssessments(projectId?: string): Promise<RiskAssessment[]>;
+  createRiskAssessment(risk: InsertRiskAssessment): Promise<RiskAssessment>;
+  updateRiskAssessment(id: number, updates: Partial<RiskAssessment>): Promise<RiskAssessment | undefined>;
+  
+  // Cost estimates
+  getCostEstimates(projectId?: string): Promise<CostEstimate[]>;
+  createCostEstimate(estimate: InsertCostEstimate): Promise<CostEstimate>;
+  updateCostEstimate(id: number, updates: Partial<CostEstimate>): Promise<CostEstimate | undefined>;
+  getProjectCostSummary(projectId: string): Promise<{
+    totalEstimated: number;
+    totalActual: number;
+    byCategory: Array<{ category: string; estimated: number; actual: number }>;
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -53,6 +103,16 @@ export class MemStorage implements IStorage {
   private maintenance: Map<number, Maintenance> = new Map();
   private alerts: Map<number, Alert> = new Map();
   private activities: Map<number, Activity> = new Map();
+  
+  // Project management storage
+  private projects: Map<number, Project> = new Map();
+  private requirements: Map<number, Requirement> = new Map();
+  private testCases: Map<number, TestCase> = new Map();
+  private uatSessions: Map<number, UatSession> = new Map();
+  private stakeholders: Map<number, Stakeholder> = new Map();
+  private riskAssessments: Map<number, RiskAssessment> = new Map();
+  private costEstimates: Map<number, CostEstimate> = new Map();
+  
   private currentId = 1;
 
   constructor() {
@@ -147,6 +207,200 @@ export class MemStorage implements IStorage {
       message: "Low Flow Detected",
       timestamp: new Date(now.getTime() - 32 * 60 * 1000),
       isRead: false
+    });
+
+    // Sample project data
+    this.createProject({
+      projectId: "PROJ-001",
+      name: "Water Quality Management System",
+      description: "Implement comprehensive water quality monitoring and alerting system for municipal water supply",
+      methodology: "agile",
+      status: "active",
+      priority: "high",
+      startDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+      endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
+      projectManager: "Augustine Ogelo",
+      sponsor: "City Water Department",
+      budget: 250000,
+      actualCost: 125000,
+      percentComplete: 65
+    });
+
+    this.createProject({
+      projectId: "PROJ-002",
+      name: "Customer Portal Enhancement",
+      description: "Modernize customer self-service portal with billing integration and service requests",
+      methodology: "waterfall",
+      status: "planning",
+      priority: "medium",
+      startDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000),
+      endDate: new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000),
+      projectManager: "Sarah Martinez",
+      sponsor: "Customer Service Division",
+      budget: 180000,
+      actualCost: 0,
+      percentComplete: 15
+    });
+
+    // Sample requirements
+    this.createRequirement({
+      projectId: "PROJ-001",
+      requirementId: "REQ-001",
+      title: "Real-time Water Quality Dashboard",
+      description: "System must display real-time water quality metrics including pH, chlorine levels, turbidity, and temperature",
+      type: "functional",
+      priority: "must_have",
+      status: "implemented",
+      source: "Water Quality Supervisor",
+      acceptanceCriteria: "Dashboard updates every 30 seconds, displays historical trends for 7 days, alerts when values exceed thresholds",
+      businessValue: "Enables proactive quality management and regulatory compliance",
+      complexity: "medium",
+      estimatedHours: 80,
+      actualHours: 85
+    });
+
+    this.createRequirement({
+      projectId: "PROJ-001",
+      requirementId: "REQ-002",
+      title: "Automated Alert System",
+      description: "System must automatically generate alerts when water quality parameters exceed EPA standards",
+      type: "functional",
+      priority: "must_have",
+      status: "tested",
+      source: "Compliance Manager",
+      acceptanceCriteria: "Alerts generated within 60 seconds, notifications sent via email and SMS, escalation after 15 minutes",
+      businessValue: "Ensures rapid response to quality issues and regulatory compliance",
+      complexity: "high",
+      estimatedHours: 120,
+      actualHours: 95
+    });
+
+    // Sample test cases
+    this.createTestCase({
+      projectId: "PROJ-001",
+      requirementId: "REQ-001",
+      testCaseId: "TC-001",
+      title: "Dashboard Data Refresh Test",
+      description: "Verify dashboard updates with fresh data every 30 seconds",
+      type: "functional",
+      priority: "high",
+      status: "passed",
+      preconditions: "Dashboard is loaded and connected to data source",
+      testSteps: [
+        { step: 1, action: "Load dashboard page", expected: "Dashboard loads successfully" },
+        { step: 2, action: "Wait 30 seconds", expected: "Data refreshes automatically" },
+        { step: 3, action: "Verify timestamp updated", expected: "Last updated timestamp shows current time" }
+      ],
+      expectedResult: "Dashboard shows fresh data with updated timestamp",
+      actualResult: "Data refreshed successfully within 28 seconds",
+      executedBy: "QA Team",
+      executedAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+      notes: "Test passed, slightly faster than required"
+    });
+
+    // Sample UAT session
+    this.createUatSession({
+      projectId: "PROJ-001",
+      sessionId: "UAT-001",
+      name: "Water Quality Dashboard UAT - Phase 1",
+      description: "User acceptance testing for basic dashboard functionality with operations team",
+      startDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
+      endDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+      status: "completed",
+      participants: [
+        { name: "John Martinez", role: "Operations Supervisor", department: "Operations", email: "j.martinez@waterutil.gov" },
+        { name: "Lisa Wong", role: "Field Technician", department: "Quality Control", email: "l.wong@waterutil.gov" },
+        { name: "Robert Kim", role: "System Administrator", department: "IT", email: "r.kim@waterutil.gov" }
+      ],
+      testCases: ["TC-001"],
+      feedback: [
+        {
+          participant: "John Martinez",
+          rating: 4,
+          comments: "Interface is intuitive, but alerts need to be more prominent",
+          issues: ["Alert visibility needs improvement", "Need mobile app access"]
+        },
+        {
+          participant: "Lisa Wong", 
+          rating: 5,
+          comments: "Excellent real-time updates, much better than old system",
+          issues: []
+        }
+      ],
+      overallRating: 4.3,
+      approved: true,
+      approvedBy: "John Martinez",
+      approvedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+      notes: "Approved with minor enhancements for alert visibility"
+    });
+
+    // Sample stakeholders
+    this.createStakeholder({
+      projectId: "PROJ-001",
+      name: "Augustine Ogelo",
+      role: "Project Manager",
+      department: "MIS",
+      email: "a.ogelo@waterutil.gov",
+      phone: "555-0101",
+      influence: "high",
+      interest: "high",
+      communicationPreference: "email"
+    });
+
+    this.createStakeholder({
+      projectId: "PROJ-001",
+      name: "Michael Thompson",
+      role: "Water Quality Supervisor",
+      department: "Operations",
+      email: "m.thompson@waterutil.gov",
+      phone: "555-0102",
+      influence: "high",
+      interest: "high",
+      communicationPreference: "phone"
+    });
+
+    // Sample risk assessments
+    this.createRiskAssessment({
+      projectId: "PROJ-001",
+      riskId: "RISK-001",
+      title: "Data Integration Complexity",
+      description: "Legacy SCADA system integration may require custom interfaces and data transformation",
+      category: "technical",
+      probability: "medium",
+      impact: "high",
+      riskLevel: "high",
+      status: "mitigating",
+      mitigation: "Engage SCADA vendor for API development, allocate additional integration time",
+      contingency: "Implement manual data entry interface as backup",
+      owner: "Augustine Ogelo",
+      reviewDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    });
+
+    // Sample cost estimates
+    this.createCostEstimate({
+      projectId: "PROJ-001",
+      category: "labor",
+      item: "Senior Developer",
+      description: "Full-stack developer for 6 months",
+      quantity: 6,
+      unitCost: 12000,
+      totalCost: 72000,
+      contingency: 10,
+      finalCost: 79200,
+      vendor: "Internal Staff"
+    });
+
+    this.createCostEstimate({
+      projectId: "PROJ-001",
+      category: "software",
+      item: "Database Monitoring Tools",
+      description: "PostgreSQL monitoring and analytics software licenses",
+      quantity: 1,
+      unitCost: 15000,
+      totalCost: 15000,
+      contingency: 5,
+      finalCost: 15750,
+      vendor: "DataDog"
     });
   }
 
@@ -366,6 +620,313 @@ export class MemStorage implements IStorage {
     };
     this.activities.set(id, newActivity);
     return newActivity;
+  }
+
+  // Project management methods
+  async getProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values()).sort((a, b) => 
+      b.createdAt!.getTime() - a.createdAt!.getTime()
+    );
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    return this.projects.get(id);
+  }
+
+  async getProjectByProjectId(projectId: string): Promise<Project | undefined> {
+    return Array.from(this.projects.values()).find(p => p.projectId === projectId);
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const id = this.currentId++;
+    const newProject: Project = {
+      ...project,
+      id,
+      status: project.status || "planning",
+      priority: project.priority || "medium",
+      methodology: project.methodology || "agile",
+      percentComplete: project.percentComplete || 0,
+      startDate: project.startDate || null,
+      endDate: project.endDate || null,
+      actualStartDate: project.actualStartDate || null,
+      actualEndDate: project.actualEndDate || null,
+      sponsor: project.sponsor || null,
+      budget: project.budget || null,
+      actualCost: project.actualCost || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.projects.set(id, newProject);
+    return newProject;
+  }
+
+  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+    const project = this.projects.get(id);
+    if (!project) return undefined;
+    
+    const updated = { ...project, ...updates, updatedAt: new Date() };
+    this.projects.set(id, updated);
+    return updated;
+  }
+
+  async getRequirements(projectId?: string): Promise<Requirement[]> {
+    let requirements = Array.from(this.requirements.values());
+    if (projectId) {
+      requirements = requirements.filter(r => r.projectId === projectId);
+    }
+    return requirements.sort((a, b) => a.requirementId.localeCompare(b.requirementId));
+  }
+
+  async getRequirement(id: number): Promise<Requirement | undefined> {
+    return this.requirements.get(id);
+  }
+
+  async createRequirement(requirement: InsertRequirement): Promise<Requirement> {
+    const id = this.currentId++;
+    const newRequirement: Requirement = {
+      ...requirement,
+      id,
+      type: requirement.type || "functional",
+      priority: requirement.priority || "medium",
+      status: requirement.status || "draft",
+      source: requirement.source || null,
+      acceptanceCriteria: requirement.acceptanceCriteria || null,
+      businessValue: requirement.businessValue || null,
+      complexity: requirement.complexity || "medium",
+      estimatedHours: requirement.estimatedHours || null,
+      actualHours: requirement.actualHours || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.requirements.set(id, newRequirement);
+    return newRequirement;
+  }
+
+  async updateRequirement(id: number, updates: Partial<Requirement>): Promise<Requirement | undefined> {
+    const requirement = this.requirements.get(id);
+    if (!requirement) return undefined;
+    
+    const updated = { ...requirement, ...updates, updatedAt: new Date() };
+    this.requirements.set(id, updated);
+    return updated;
+  }
+
+  async getTestCases(projectId?: string, requirementId?: string): Promise<TestCase[]> {
+    let testCases = Array.from(this.testCases.values());
+    if (projectId) {
+      testCases = testCases.filter(tc => tc.projectId === projectId);
+    }
+    if (requirementId) {
+      testCases = testCases.filter(tc => tc.requirementId === requirementId);
+    }
+    return testCases.sort((a, b) => a.testCaseId.localeCompare(b.testCaseId));
+  }
+
+  async getTestCase(id: number): Promise<TestCase | undefined> {
+    return this.testCases.get(id);
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    const id = this.currentId++;
+    const newTestCase: TestCase = {
+      ...testCase,
+      id,
+      requirementId: testCase.requirementId || null,
+      type: testCase.type || "functional",
+      priority: testCase.priority || "medium",
+      status: testCase.status || "not_executed",
+      preconditions: testCase.preconditions || null,
+      testSteps: testCase.testSteps || null,
+      expectedResult: testCase.expectedResult || null,
+      actualResult: testCase.actualResult || null,
+      testData: testCase.testData || null,
+      executedBy: testCase.executedBy || null,
+      executedAt: testCase.executedAt || null,
+      defectId: testCase.defectId || null,
+      notes: testCase.notes || null,
+      createdAt: new Date()
+    };
+    this.testCases.set(id, newTestCase);
+    return newTestCase;
+  }
+
+  async updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase | undefined> {
+    const testCase = this.testCases.get(id);
+    if (!testCase) return undefined;
+    
+    const updated = { ...testCase, ...updates };
+    if (updates.status && updates.status !== 'not_executed') {
+      updated.executedAt = new Date();
+    }
+    this.testCases.set(id, updated);
+    return updated;
+  }
+
+  async getUatSessions(projectId?: string): Promise<UatSession[]> {
+    let sessions = Array.from(this.uatSessions.values());
+    if (projectId) {
+      sessions = sessions.filter(s => s.projectId === projectId);
+    }
+    return sessions.sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
+  }
+
+  async getUatSession(id: number): Promise<UatSession | undefined> {
+    return this.uatSessions.get(id);
+  }
+
+  async createUatSession(session: InsertUatSession): Promise<UatSession> {
+    const id = this.currentId++;
+    const newSession: UatSession = {
+      ...session,
+      id,
+      status: session.status || "planning",
+      participants: session.participants || null,
+      testCases: session.testCases || null,
+      feedback: session.feedback || null,
+      overallRating: session.overallRating || null,
+      approved: session.approved || false,
+      approvedBy: session.approvedBy || null,
+      approvedAt: session.approvedAt || null,
+      notes: session.notes || null,
+      createdAt: new Date()
+    };
+    this.uatSessions.set(id, newSession);
+    return newSession;
+  }
+
+  async updateUatSession(id: number, updates: Partial<UatSession>): Promise<UatSession | undefined> {
+    const session = this.uatSessions.get(id);
+    if (!session) return undefined;
+    
+    const updated = { ...session, ...updates };
+    this.uatSessions.set(id, updated);
+    return updated;
+  }
+
+  async getStakeholders(projectId?: string): Promise<Stakeholder[]> {
+    let stakeholders = Array.from(this.stakeholders.values());
+    if (projectId) {
+      stakeholders = stakeholders.filter(s => s.projectId === projectId);
+    }
+    return stakeholders.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async createStakeholder(stakeholder: InsertStakeholder): Promise<Stakeholder> {
+    const id = this.currentId++;
+    const newStakeholder: Stakeholder = {
+      ...stakeholder,
+      id,
+      department: stakeholder.department || null,
+      email: stakeholder.email || null,
+      phone: stakeholder.phone || null,
+      influence: stakeholder.influence || "medium",
+      interest: stakeholder.interest || "medium",
+      communicationPreference: stakeholder.communicationPreference || "email",
+      notes: stakeholder.notes || null,
+      createdAt: new Date()
+    };
+    this.stakeholders.set(id, newStakeholder);
+    return newStakeholder;
+  }
+
+  async updateStakeholder(id: number, updates: Partial<Stakeholder>): Promise<Stakeholder | undefined> {
+    const stakeholder = this.stakeholders.get(id);
+    if (!stakeholder) return undefined;
+    
+    const updated = { ...stakeholder, ...updates };
+    this.stakeholders.set(id, updated);
+    return updated;
+  }
+
+  async getRiskAssessments(projectId?: string): Promise<RiskAssessment[]> {
+    let risks = Array.from(this.riskAssessments.values());
+    if (projectId) {
+      risks = risks.filter(r => r.projectId === projectId);
+    }
+    return risks.sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
+  }
+
+  async createRiskAssessment(risk: InsertRiskAssessment): Promise<RiskAssessment> {
+    const id = this.currentId++;
+    const newRisk: RiskAssessment = {
+      ...risk,
+      id,
+      status: risk.status || "identified",
+      mitigation: risk.mitigation || null,
+      contingency: risk.contingency || null,
+      owner: risk.owner || null,
+      reviewDate: risk.reviewDate || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.riskAssessments.set(id, newRisk);
+    return newRisk;
+  }
+
+  async updateRiskAssessment(id: number, updates: Partial<RiskAssessment>): Promise<RiskAssessment | undefined> {
+    const risk = this.riskAssessments.get(id);
+    if (!risk) return undefined;
+    
+    const updated = { ...risk, ...updates, updatedAt: new Date() };
+    this.riskAssessments.set(id, updated);
+    return updated;
+  }
+
+  async getCostEstimates(projectId?: string): Promise<CostEstimate[]> {
+    let estimates = Array.from(this.costEstimates.values());
+    if (projectId) {
+      estimates = estimates.filter(e => e.projectId === projectId);
+    }
+    return estimates.sort((a, b) => a.category.localeCompare(b.category));
+  }
+
+  async createCostEstimate(estimate: InsertCostEstimate): Promise<CostEstimate> {
+    const id = this.currentId++;
+    const newEstimate: CostEstimate = {
+      ...estimate,
+      id,
+      description: estimate.description || null,
+      quantity: estimate.quantity || 1,
+      contingency: estimate.contingency || 0,
+      vendor: estimate.vendor || null,
+      notes: estimate.notes || null,
+      createdAt: new Date()
+    };
+    this.costEstimates.set(id, newEstimate);
+    return newEstimate;
+  }
+
+  async updateCostEstimate(id: number, updates: Partial<CostEstimate>): Promise<CostEstimate | undefined> {
+    const estimate = this.costEstimates.get(id);
+    if (!estimate) return undefined;
+    
+    const updated = { ...estimate, ...updates };
+    this.costEstimates.set(id, updated);
+    return updated;
+  }
+
+  async getProjectCostSummary(projectId: string): Promise<{
+    totalEstimated: number;
+    totalActual: number;
+    byCategory: Array<{ category: string; estimated: number; actual: number }>;
+  }> {
+    const estimates = await this.getCostEstimates(projectId);
+    const project = await this.getProjectByProjectId(projectId);
+    
+    const totalEstimated = estimates.reduce((sum, est) => sum + est.finalCost, 0);
+    const totalActual = project?.actualCost || 0;
+    
+    const byCategory = estimates.reduce((acc, est) => {
+      const existing = acc.find(c => c.category === est.category);
+      if (existing) {
+        existing.estimated += est.finalCost;
+      } else {
+        acc.push({ category: est.category, estimated: est.finalCost, actual: 0 });
+      }
+      return acc;
+    }, [] as Array<{ category: string; estimated: number; actual: number }>);
+    
+    return { totalEstimated, totalActual, byCategory };
   }
 }
 
@@ -649,6 +1210,332 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return newActivity;
+  }
+
+  // Project management methods
+  async getProjects(): Promise<Project[]> {
+    const projectsList = await db.select().from(projects).orderBy(desc(projects.createdAt));
+    return projectsList;
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
+  }
+
+  async getProjectByProjectId(projectId: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.projectId, projectId));
+    return project || undefined;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const [newProject] = await db
+      .insert(projects)
+      .values({
+        ...project,
+        status: project.status || "planning",
+        priority: project.priority || "medium",
+        methodology: project.methodology || "agile",
+        percentComplete: project.percentComplete || 0,
+        startDate: project.startDate || null,
+        endDate: project.endDate || null,
+        actualStartDate: project.actualStartDate || null,
+        actualEndDate: project.actualEndDate || null,
+        sponsor: project.sponsor || null,
+        budget: project.budget || null,
+        actualCost: project.actualCost || null
+      })
+      .returning();
+    return newProject;
+  }
+
+  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+    const [updatedProject] = await db
+      .update(projects)
+      .set(updates)
+      .where(eq(projects.id, id))
+      .returning();
+    return updatedProject || undefined;
+  }
+
+  async getRequirements(projectId?: string): Promise<Requirement[]> {
+    let query = db.select().from(requirements);
+    
+    if (projectId) {
+      query = query.where(eq(requirements.projectId, projectId)) as any;
+    }
+    
+    const requirementsList = await query.orderBy(requirements.requirementId);
+    return requirementsList;
+  }
+
+  async getRequirement(id: number): Promise<Requirement | undefined> {
+    const [requirement] = await db.select().from(requirements).where(eq(requirements.id, id));
+    return requirement || undefined;
+  }
+
+  async createRequirement(requirement: InsertRequirement): Promise<Requirement> {
+    const [newRequirement] = await db
+      .insert(requirements)
+      .values({
+        ...requirement,
+        type: requirement.type || "functional",
+        priority: requirement.priority || "medium",
+        status: requirement.status || "draft",
+        source: requirement.source || null,
+        acceptanceCriteria: requirement.acceptanceCriteria || null,
+        businessValue: requirement.businessValue || null,
+        complexity: requirement.complexity || "medium",
+        estimatedHours: requirement.estimatedHours || null,
+        actualHours: requirement.actualHours || null
+      })
+      .returning();
+    return newRequirement;
+  }
+
+  async updateRequirement(id: number, updates: Partial<Requirement>): Promise<Requirement | undefined> {
+    const [updatedRequirement] = await db
+      .update(requirements)
+      .set(updates)
+      .where(eq(requirements.id, id))
+      .returning();
+    return updatedRequirement || undefined;
+  }
+
+  async getTestCases(projectId?: string, requirementId?: string): Promise<TestCase[]> {
+    let query = db.select().from(testCases);
+    
+    const conditions = [];
+    if (projectId) {
+      conditions.push(eq(testCases.projectId, projectId));
+    }
+    if (requirementId) {
+      conditions.push(eq(testCases.requirementId, requirementId));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    const testCasesList = await query.orderBy(testCases.testCaseId);
+    return testCasesList;
+  }
+
+  async getTestCase(id: number): Promise<TestCase | undefined> {
+    const [testCase] = await db.select().from(testCases).where(eq(testCases.id, id));
+    return testCase || undefined;
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    const [newTestCase] = await db
+      .insert(testCases)
+      .values({
+        ...testCase,
+        requirementId: testCase.requirementId || null,
+        type: testCase.type || "functional",
+        priority: testCase.priority || "medium",
+        status: testCase.status || "not_executed",
+        preconditions: testCase.preconditions || null,
+        testSteps: testCase.testSteps || null,
+        expectedResult: testCase.expectedResult || null,
+        actualResult: testCase.actualResult || null,
+        testData: testCase.testData || null,
+        executedBy: testCase.executedBy || null,
+        executedAt: testCase.executedAt || null,
+        defectId: testCase.defectId || null,
+        notes: testCase.notes || null
+      })
+      .returning();
+    return newTestCase;
+  }
+
+  async updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase | undefined> {
+    const updateData = { ...updates };
+    if (updates.status && updates.status !== 'not_executed') {
+      updateData.executedAt = new Date();
+    }
+    
+    const [updatedTestCase] = await db
+      .update(testCases)
+      .set(updateData)
+      .where(eq(testCases.id, id))
+      .returning();
+    return updatedTestCase || undefined;
+  }
+
+  async getUatSessions(projectId?: string): Promise<UatSession[]> {
+    let query = db.select().from(uatSessions);
+    
+    if (projectId) {
+      query = query.where(eq(uatSessions.projectId, projectId)) as any;
+    }
+    
+    const sessions = await query.orderBy(desc(uatSessions.createdAt));
+    return sessions;
+  }
+
+  async getUatSession(id: number): Promise<UatSession | undefined> {
+    const [session] = await db.select().from(uatSessions).where(eq(uatSessions.id, id));
+    return session || undefined;
+  }
+
+  async createUatSession(session: InsertUatSession): Promise<UatSession> {
+    const [newSession] = await db
+      .insert(uatSessions)
+      .values({
+        ...session,
+        status: session.status || "planning",
+        participants: session.participants || null,
+        testCases: session.testCases || null,
+        feedback: session.feedback || null,
+        overallRating: session.overallRating || null,
+        approved: session.approved || false,
+        approvedBy: session.approvedBy || null,
+        approvedAt: session.approvedAt || null,
+        notes: session.notes || null
+      })
+      .returning();
+    return newSession;
+  }
+
+  async updateUatSession(id: number, updates: Partial<UatSession>): Promise<UatSession | undefined> {
+    const [updatedSession] = await db
+      .update(uatSessions)
+      .set(updates)
+      .where(eq(uatSessions.id, id))
+      .returning();
+    return updatedSession || undefined;
+  }
+
+  async getStakeholders(projectId?: string): Promise<Stakeholder[]> {
+    let query = db.select().from(stakeholders);
+    
+    if (projectId) {
+      query = query.where(eq(stakeholders.projectId, projectId)) as any;
+    }
+    
+    const stakeholdersList = await query.orderBy(stakeholders.name);
+    return stakeholdersList;
+  }
+
+  async createStakeholder(stakeholder: InsertStakeholder): Promise<Stakeholder> {
+    const [newStakeholder] = await db
+      .insert(stakeholders)
+      .values({
+        ...stakeholder,
+        department: stakeholder.department || null,
+        email: stakeholder.email || null,
+        phone: stakeholder.phone || null,
+        influence: stakeholder.influence || "medium",
+        interest: stakeholder.interest || "medium",
+        communicationPreference: stakeholder.communicationPreference || "email",
+        notes: stakeholder.notes || null
+      })
+      .returning();
+    return newStakeholder;
+  }
+
+  async updateStakeholder(id: number, updates: Partial<Stakeholder>): Promise<Stakeholder | undefined> {
+    const [updatedStakeholder] = await db
+      .update(stakeholders)
+      .set(updates)
+      .where(eq(stakeholders.id, id))
+      .returning();
+    return updatedStakeholder || undefined;
+  }
+
+  async getRiskAssessments(projectId?: string): Promise<RiskAssessment[]> {
+    let query = db.select().from(riskAssessments);
+    
+    if (projectId) {
+      query = query.where(eq(riskAssessments.projectId, projectId)) as any;
+    }
+    
+    const risks = await query.orderBy(desc(riskAssessments.createdAt));
+    return risks;
+  }
+
+  async createRiskAssessment(risk: InsertRiskAssessment): Promise<RiskAssessment> {
+    const [newRisk] = await db
+      .insert(riskAssessments)
+      .values({
+        ...risk,
+        status: risk.status || "identified",
+        mitigation: risk.mitigation || null,
+        contingency: risk.contingency || null,
+        owner: risk.owner || null,
+        reviewDate: risk.reviewDate || null
+      })
+      .returning();
+    return newRisk;
+  }
+
+  async updateRiskAssessment(id: number, updates: Partial<RiskAssessment>): Promise<RiskAssessment | undefined> {
+    const [updatedRisk] = await db
+      .update(riskAssessments)
+      .set(updates)
+      .where(eq(riskAssessments.id, id))
+      .returning();
+    return updatedRisk || undefined;
+  }
+
+  async getCostEstimates(projectId?: string): Promise<CostEstimate[]> {
+    let query = db.select().from(costEstimates);
+    
+    if (projectId) {
+      query = query.where(eq(costEstimates.projectId, projectId)) as any;
+    }
+    
+    const estimates = await query.orderBy(costEstimates.category);
+    return estimates;
+  }
+
+  async createCostEstimate(estimate: InsertCostEstimate): Promise<CostEstimate> {
+    const [newEstimate] = await db
+      .insert(costEstimates)
+      .values({
+        ...estimate,
+        description: estimate.description || null,
+        quantity: estimate.quantity || 1,
+        contingency: estimate.contingency || 0,
+        vendor: estimate.vendor || null,
+        notes: estimate.notes || null
+      })
+      .returning();
+    return newEstimate;
+  }
+
+  async updateCostEstimate(id: number, updates: Partial<CostEstimate>): Promise<CostEstimate | undefined> {
+    const [updatedEstimate] = await db
+      .update(costEstimates)
+      .set(updates)
+      .where(eq(costEstimates.id, id))
+      .returning();
+    return updatedEstimate || undefined;
+  }
+
+  async getProjectCostSummary(projectId: string): Promise<{
+    totalEstimated: number;
+    totalActual: number;
+    byCategory: Array<{ category: string; estimated: number; actual: number }>;
+  }> {
+    const estimates = await this.getCostEstimates(projectId);
+    const project = await this.getProjectByProjectId(projectId);
+    
+    const totalEstimated = estimates.reduce((sum, est) => sum + est.finalCost, 0);
+    const totalActual = project?.actualCost || 0;
+    
+    const byCategory = estimates.reduce((acc, est) => {
+      const existing = acc.find(c => c.category === est.category);
+      if (existing) {
+        existing.estimated += est.finalCost;
+      } else {
+        acc.push({ category: est.category, estimated: est.finalCost, actual: 0 });
+      }
+      return acc;
+    }, [] as Array<{ category: string; estimated: number; actual: number }>);
+    
+    return { totalEstimated, totalActual, byCategory };
   }
 }
 

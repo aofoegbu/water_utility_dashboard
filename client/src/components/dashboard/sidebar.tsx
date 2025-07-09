@@ -1,4 +1,4 @@
-import { BarChart3, Droplet, AlertTriangle, Wrench, FileText, Users } from "lucide-react";
+import { BarChart3, Droplet, AlertTriangle, Wrench, FileText, Users, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ const navigation = [
   { name: "Water Usage", href: "/water-usage", icon: Droplet },
   { name: "Leak Detection", href: "/leaks", icon: AlertTriangle },
   { name: "Maintenance", href: "/maintenance", icon: Wrench },
+  { name: "Projects & UAT", href: "/projects", icon: Target },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Customers", href: "/customers", icon: Users },
 ];
