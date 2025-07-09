@@ -1,8 +1,8 @@
-# TMWA MIS Analyst Portfolio Projects - replit.md
+# Ogelo MIS Analyst Portfolio Projects - replit.md
 
 ## Overview
 
-This repository contains 5 comprehensive portfolio projects designed to demonstrate qualifications for a TMWA MIS Analyst position. The projects showcase business analyst and technical skills including SQL expertise, business intelligence, utility operations knowledge, and integration capabilities.
+This repository contains 5 comprehensive portfolio projects designed to demonstrate qualifications for a MIS Analyst position. The projects showcase business analyst and technical skills including SQL expertise, business intelligence, utility operations knowledge, and integration capabilities.
 
 ## User Preferences
 

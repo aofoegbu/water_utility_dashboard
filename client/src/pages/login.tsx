@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Water Utility Dashboard
+            Ogelo Water Utility Dashboard
           </CardTitle>
           <CardDescription>
             Sign in to access your dashboard

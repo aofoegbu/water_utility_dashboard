@@ -117,7 +117,7 @@ export default function Dashboard() {
                         {user?.fullName || user?.username || 'User'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {user?.email || 'user@example.com'}
+                        {user?.email || 'augustineogelo1@gmail.com'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Analyst'} • {user?.department || 'Water Utility'}

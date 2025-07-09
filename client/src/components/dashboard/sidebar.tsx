@@ -37,7 +37,7 @@ export default function Sidebar() {
               <Droplet className="text-white h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">TMWA</h1>
+              <h1 className="text-lg font-semibold text-gray-900">Ogelo</h1>
               <p className="text-sm text-gray-500">Water Utility</p>
             </div>
           </div>

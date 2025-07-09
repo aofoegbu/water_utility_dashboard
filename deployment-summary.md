@@ -1,8 +1,8 @@
-# TMWA MIS Analyst Portfolio - Deployment Summary
+# Ogelo MIS Analyst Portfolio - Deployment Summary
 
 ## 🎯 Portfolio Overview
 
-All 5 comprehensive portfolio projects have been successfully developed, tested, and prepared for GitHub deployment. Each project demonstrates specific skills relevant to the TMWA MIS Analyst position.
+All 5 comprehensive portfolio projects have been successfully developed, tested, and prepared for GitHub deployment. Each project demonstrates specific skills relevant to the MIS Analyst position.
 
 ## ✅ Project Status & Features
 
@@ -40,7 +40,7 @@ All 5 comprehensive portfolio projects have been successfully developed, tested,
 ## 📁 GitHub Repository Structure
 
 ```
-tmwa-mis-analyst-portfolio/
+ogelo-mis-analyst-portfolio/
 ├── README.md                           # Main portfolio overview
 ├── water-utility-dashboard/            # Project 1 - Main application
 │   ├── README.md                      # Detailed project documentation
@@ -83,8 +83,8 @@ tmwa-mis-analyst-portfolio/
 ### Clone and Setup
 ```bash
 # Clone the repository
-git clone https://github.com/[username]/tmwa-mis-analyst-portfolio.git
-cd tmwa-mis-analyst-portfolio
+git clone https://github.com/[username]/ogelo-mis-analyst-portfolio.git
+cd ogelo-mis-analyst-portfolio
 
 # Start Project 1 (Main Dashboard) - PostgreSQL Required
 cd water-utility-dashboard
@@ -211,7 +211,8 @@ npm start  # Runs on port 6000
 ## 📞 Contact Information
 
 **Portfolio Developer**: MIS Analyst Candidate  
-**Target Position**: TMWA MIS Analyst  
+**Target Position**: MIS Analyst  
+**Contact**: augustineogelo1@gmail.com  
 **Portfolio Repository**: [GitHub Repository URL]  
 **Email**: [Your Email Address]  
 **LinkedIn**: [Your LinkedIn Profile]  
