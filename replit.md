@@ -20,9 +20,10 @@ User interface: Display user's full name everywhere, capitalize job titles.
 
 ### Project 2: ERP/CRM Mock Integration Tool  
 - **Purpose**: Demonstrates integration between CRM and ERP systems via mock APIs
-- **Skills Demonstrated**: System integration, API design, error handling
+- **Skills Demonstrated**: System integration, API design, error handling, enterprise workflows
 - **Port**: 3000
-- **Status**: ✓ Complete with full integration workflow
+- **Status**: ✓ Complete with comprehensive dashboard, real-time monitoring, and automated testing
+- **Recent Updates**: Full enterprise integration simulation with CRM/ERP sync, ticket management, maintenance scheduling, system health monitoring, and comprehensive test suite
 
 ### Project 3: Project Tracker with Business Requirements & UAT Support
 - **Purpose**: Comprehensive project lifecycle management with UAT tracking
@@ -178,3 +179,11 @@ The portfolio demonstrates end-to-end capabilities for MIS Analyst role includin
   - Floating chat interface with quick suggestions and natural language processing
   - Instant responses for operational guidance and troubleshooting
   - Professional responses covering EPA standards, safety protocols, and best practices
+
+- ✅ **ERP/CRM Integration Tool**: Built comprehensive enterprise system integration demonstration
+  - Full-stack Node.js/Express API with real-time dashboard interface
+  - Mock CRM and ERP systems with bi-directional data synchronization
+  - Customer management, support ticket workflow, and maintenance scheduling
+  - Integration monitoring with detailed logging and health checks
+  - Report generation (JSON/CSV) and performance metrics
+  - Comprehensive test suite with 50+ test cases covering all endpoints and workflows
