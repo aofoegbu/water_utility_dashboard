@@ -368,4 +368,279 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { eq, desc, count, sum, avg, and, gte, lte } from "drizzle-orm";
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        role: insertUser.role || "analyst"
+      })
+      .returning();
+    return user;
+  }
+
+  async getWaterUsage(filters?: { startDate?: Date; endDate?: Date; location?: string }): Promise<WaterUsage[]> {
+    let query = db.select().from(waterUsage);
+    
+    const conditions = [];
+    if (filters?.startDate) {
+      conditions.push(gte(waterUsage.timestamp, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lte(waterUsage.timestamp, filters.endDate));
+    }
+    if (filters?.location) {
+      conditions.push(eq(waterUsage.location, filters.location));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    const usage = await query.orderBy(desc(waterUsage.timestamp));
+    return usage;
+  }
+
+  async createWaterUsage(usage: InsertWaterUsage): Promise<WaterUsage> {
+    const [newUsage] = await db
+      .insert(waterUsage)
+      .values({
+        ...usage,
+        temperature: usage.temperature || null,
+        qualityMetrics: usage.qualityMetrics || null
+      })
+      .returning();
+    return newUsage;
+  }
+
+  async getUsageStatistics(): Promise<{
+    totalToday: number;
+    totalYesterday: number;
+    averagePressure: number;
+    peakUsageTime: string;
+  }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dayBeforeYesterday = new Date(yesterday);
+    dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 1);
+
+    const [todayUsage] = await db
+      .select({ total: sum(waterUsage.gallons) })
+      .from(waterUsage)
+      .where(gte(waterUsage.timestamp, today));
+
+    const [yesterdayUsage] = await db
+      .select({ total: sum(waterUsage.gallons) })
+      .from(waterUsage)
+      .where(and(
+        gte(waterUsage.timestamp, yesterday),
+        lte(waterUsage.timestamp, today)
+      ));
+
+    const [avgPressure] = await db
+      .select({ avg: avg(waterUsage.pressure) })
+      .from(waterUsage)
+      .where(gte(waterUsage.timestamp, yesterday));
+
+    return {
+      totalToday: Number(todayUsage.total) || 0,
+      totalYesterday: Number(yesterdayUsage.total) || 0,
+      averagePressure: Number(avgPressure.avg) || 0,
+      peakUsageTime: "10:00 AM" // This would need more complex query in real implementation
+    };
+  }
+
+  async getLeaks(status?: string): Promise<Leak[]> {
+    let query = db.select().from(leaks);
+    
+    if (status) {
+      query = query.where(eq(leaks.status, status)) as any;
+    }
+    
+    const leaksList = await query.orderBy(desc(leaks.detectedAt));
+    return leaksList;
+  }
+
+  async createLeak(leak: InsertLeak): Promise<Leak> {
+    const [newLeak] = await db
+      .insert(leaks)
+      .values({
+        ...leak,
+        status: leak.status || "active",
+        resolvedAt: leak.resolvedAt || null,
+        estimatedGallonsLost: leak.estimatedGallonsLost || null,
+        assignedTechnician: leak.assignedTechnician || null,
+        notes: leak.notes || null
+      })
+      .returning();
+
+    // Create alert for new leak
+    await this.createAlert({
+      type: "leak",
+      severity: leak.severity === "critical" ? "critical" : "warning",
+      location: leak.location,
+      message: `Leak Detected at ${leak.location}`,
+      timestamp: leak.detectedAt,
+      isRead: false
+    });
+
+    return newLeak;
+  }
+
+  async updateLeak(id: number, updates: Partial<Leak>): Promise<Leak | undefined> {
+    const [updatedLeak] = await db
+      .update(leaks)
+      .set(updates)
+      .where(eq(leaks.id, id))
+      .returning();
+    return updatedLeak || undefined;
+  }
+
+  async getActiveLeaksCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(leaks)
+      .where(eq(leaks.status, "active"));
+    return result.count;
+  }
+
+  async getMaintenance(filters?: { status?: string; date?: Date }): Promise<Maintenance[]> {
+    let query = db.select().from(maintenance);
+    
+    const conditions = [];
+    if (filters?.status) {
+      conditions.push(eq(maintenance.status, filters.status));
+    }
+    if (filters?.date) {
+      const startOfDay = new Date(filters.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(filters.date);
+      endOfDay.setHours(23, 59, 59, 999);
+      conditions.push(and(
+        gte(maintenance.scheduledDate, startOfDay),
+        lte(maintenance.scheduledDate, endOfDay)
+      ));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    const tasks = await query.orderBy(maintenance.scheduledDate);
+    return tasks;
+  }
+
+  async createMaintenance(task: InsertMaintenance): Promise<Maintenance> {
+    const [newTask] = await db
+      .insert(maintenance)
+      .values({
+        ...task,
+        status: task.status || "pending",
+        completedDate: task.completedDate || null,
+        estimatedDuration: task.estimatedDuration || null,
+        notes: task.notes || null,
+        cost: task.cost || null
+      })
+      .returning();
+    return newTask;
+  }
+
+  async updateMaintenance(id: number, updates: Partial<Maintenance>): Promise<Maintenance | undefined> {
+    const [updatedTask] = await db
+      .update(maintenance)
+      .set(updates)
+      .where(eq(maintenance.id, id))
+      .returning();
+    return updatedTask || undefined;
+  }
+
+  async getTodaysMaintenance(): Promise<Maintenance[]> {
+    const today = new Date();
+    return this.getMaintenance({ date: today });
+  }
+
+  async getPendingMaintenanceCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(maintenance)
+      .where(eq(maintenance.status, "pending"));
+    return result.count;
+  }
+
+  async getAlerts(unreadOnly?: boolean): Promise<Alert[]> {
+    let query = db.select().from(alerts);
+    
+    if (unreadOnly) {
+      query = query.where(eq(alerts.isRead, false)) as any;
+    }
+    
+    const alertsList = await query.orderBy(desc(alerts.timestamp));
+    return alertsList;
+  }
+
+  async createAlert(alert: InsertAlert): Promise<Alert> {
+    const [newAlert] = await db
+      .insert(alerts)
+      .values({
+        ...alert,
+        isRead: alert.isRead || false,
+        resolvedAt: alert.resolvedAt || null
+      })
+      .returning();
+    return newAlert;
+  }
+
+  async markAlertAsRead(id: number): Promise<void> {
+    await db
+      .update(alerts)
+      .set({ isRead: true })
+      .where(eq(alerts.id, id));
+  }
+
+  async getUnreadAlertsCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(alerts)
+      .where(eq(alerts.isRead, false));
+    return result.count;
+  }
+
+  async getRecentActivities(limit: number = 10): Promise<Activity[]> {
+    const activitiesList = await db
+      .select()
+      .from(activities)
+      .orderBy(desc(activities.timestamp))
+      .limit(limit);
+    return activitiesList;
+  }
+
+  async createActivity(activity: InsertActivity): Promise<Activity> {
+    const [newActivity] = await db
+      .insert(activities)
+      .values({
+        ...activity,
+        technician: activity.technician || null,
+        details: activity.details || null
+      })
+      .returning();
+    return newActivity;
+  }
+}
+
+export const storage = new DatabaseStorage();

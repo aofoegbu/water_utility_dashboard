@@ -71,7 +71,7 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **RESTful API** using Express.js
 - **Type-safe data layer** with Drizzle ORM
-- **In-memory storage** implementation with interface for easy database swapping
+- **PostgreSQL database** with comprehensive schema and automatic seeding
 - **Report generation** capabilities (PDF/CSV exports)
 - **Real-time data aggregation** for dashboard KPIs
 
@@ -87,17 +87,18 @@ The application models a complete water utility system with tables for:
 ## Data Flow
 
 1. **Real-time Monitoring**: Frontend polls backend APIs every 30-60 seconds for fresh data
-2. **Dashboard KPIs**: Aggregated statistics calculated on-demand from raw data
-3. **CRUD Operations**: Standard create, read, update, delete operations for all entities
+2. **Dashboard KPIs**: Aggregated statistics calculated on-demand from PostgreSQL database
+3. **CRUD Operations**: Standard create, read, update, delete operations for all entities using Drizzle ORM
 4. **Report Generation**: Server-side PDF/CSV generation with downloadable exports
 5. **Alert System**: Automatic alert generation based on system thresholds
+6. **Database Seeding**: Automatic sample data creation on first startup for demonstration
 
 ## Technology Stack
 
 ### Project 1: Water Utility Dashboard (React/TypeScript/Node.js)
 - **Frontend**: React with TypeScript, shadcn/ui components, Tailwind CSS
 - **Backend**: Express.js with TypeScript serving REST APIs  
-- **Database**: PostgreSQL with Drizzle ORM for type-safe operations
+- **Database**: PostgreSQL with Drizzle ORM, comprehensive schema, automatic seeding
 - **State Management**: TanStack Query for server state
 - **Key Features**: Real-time monitoring, leak detection, maintenance scheduling, report generation
 

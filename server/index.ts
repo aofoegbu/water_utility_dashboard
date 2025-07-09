@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { seedDatabase } from "./seed-data";
 
 const app = express();
 app.use(express.json());
@@ -36,7 +37,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// Seed database on startup if empty
+async function initializeDatabase() {
+  try {
+    // Check if we need to seed the database by checking if users table is empty
+    const { db } = await import("./db");
+    const { users } = await import("@shared/schema");
+    const userCount = await db.select().from(users).limit(1);
+    
+    if (userCount.length === 0) {
+      await seedDatabase();
+    }
+  } catch (error) {
+    console.error("Database initialization error:", error);
+  }
+}
+
 (async () => {
+  // Initialize database with sample data if needed
+  await initializeDatabase();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
