@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Process Mapper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #333;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.8;
+            color: #555;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .metric-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-detail {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .metric-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .content-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            height: fit-content;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .sidebar-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .content-body {
+            padding: 30px;
+        }
+
+        .process-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .process-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .process-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .process-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .process-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.active { background: #d1ecf1; color: #0c5460; }
+        .status.draft { background: #f8d7da; color: #721c24; }
+        .status.under_review { background: #fff3cd; color: #856404; }
+        .status.completed { background: #d4edda; color: #155724; }
+
+        .risk-level {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .risk-level.low { background: #d4edda; color: #155724; }
+        .risk-level.medium { background: #fff3cd; color: #856404; }
+        .risk-level.high { background: #f8d7da; color: #721c24; }
+        .risk-level.critical { background: #f5c6cb; color: #491217; }
+
+        .step-list {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .step-item {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .step-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn.success:hover {
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th,
+        .table td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .metric-progress {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .metric-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .optimization-suggestions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .suggestion-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-recommendation {
+            color: #495057;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        @media (max-width: 1024px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .process-header {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .step-item {
+                flex-direction: column;
+                align-items: start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Business Process Mapper</h1>
+            <p>Comprehensive business process documentation, analysis, and optimization for water utility operations</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="showTab('processes')">Processes</button>
+            <button class="nav-tab" onclick="showTab('optimization')">Optimization</button>
+            <button class="nav-tab" onclick="showTab('change-requests')">Change Requests</button>
+            <button class="nav-tab" onclick="showTab('compliance')">Compliance</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid" id="dashboardMetrics">
+                <div class="loading">Loading analytics</div>
+            </div>
+        </div>
+
+        <!-- Processes Tab -->
+        <div id="processes" class="tab-content">
+            <div class="content-layout">
+                <div class="sidebar">
+                    <h3>Process Categories</h3>
+                    <div class="sidebar-item" onclick="filterProcesses('all')">All Processes</div>
+                    <div class="sidebar-item" onclick="filterProcesses('Quality Assurance')">Quality Assurance</div>
+                    <div class="sidebar-item" onclick="filterProcesses('Customer Service')">Customer Service</div>
+                    <div class="sidebar-item" onclick="filterProcesses('Emergency Management')">Emergency Management</div>
+                    <div class="sidebar-item" onclick="filterProcesses('Operations')">Operations</div>
+                    <div class="sidebar-item" onclick="filterProcesses('Maintenance')">Maintenance</div>
+                </div>
+
+                <div class="main-content">
+                    <div class="content-header">
+                        <h2>Process Library</h2>
+                        <button class="btn" onclick="showNewProcessForm()">New Process</button>
+                    </div>
+                    <div class="content-body" id="processesList">
+                        <div class="loading">Loading processes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optimization Tab -->
+        <div id="optimization" class="tab-content">
+            <div class="main-content">
+                <div class="content-header">
+                    <h2>Process Optimization</h2>
+                </div>
+                <div class="content-body" id="optimizationContent">
+                    <div class="loading">Loading optimization analysis</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Requests Tab -->
+        <div id="change-requests" class="tab-content">
+            <div class="main-content">
+                <div class="content-header">
+                    <h2>Change Requests</h2>
+                    <button class="btn" onclick="showNewChangeRequestForm()">New Change Request</button>
+                </div>
+                <div class="content-body" id="changeRequestsList">
+                    <div class="loading">Loading change requests</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Tab -->
+        <div id="compliance" class="tab-content">
+            <div class="main-content">
+                <div class="content-header">
+                    <h2>Compliance Management</h2>
+                </div>
+                <div class="content-body" id="complianceContent">
+                    <div class="loading">Loading compliance data</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analytics = null;
+        let processes = null;
+        let changeRequests = null;
+        let selectedProcess = null;
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                const result = await response.json();
+                return result.success ? result.data : null;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+
+            // Load data for specific tabs
+            switch (tabName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'processes':
+                    loadProcesses();
+                    break;
+                case 'optimization':
+                    loadOptimization();
+                    break;
+                case 'change-requests':
+                    loadChangeRequests();
+                    break;
+                case 'compliance':
+                    loadCompliance();
+                    break;
+            }
+        }
+
+        async function loadDashboard() {
+            analytics = await fetchData('/api/analytics/dashboard');
+            if (analytics) {
+                renderDashboard();
+            }
+        }
+
+        function renderDashboard() {
+            if (!analytics) return;
+
+            const metricsHtml = `
+                <div class="metric-card">
+                    <h3>Total Processes</h3>
+                    <div class="metric-number">${analytics.processes.total}</div>
+                    <div class="metric-detail">
+                        <span class="metric-badge">${analytics.processes.active} Active</span>
+                        <span class="metric-badge">${analytics.processes.draft} Draft</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Risk Management</h3>
+                    <div class="metric-number">${analytics.risks.total}</div>
+                    <div class="metric-detail">
+                        <span class="metric-badge">${analytics.risks.critical + analytics.risks.high} High+ Risk</span>
+                        <span class="metric-badge">${analytics.risks.medium} Medium</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Change Requests</h3>
+                    <div class="metric-number">${analytics.changeRequests.total}</div>
+                    <div class="metric-detail">
+                        <span class="metric-badge">${analytics.changeRequests.pending} Pending</span>
+                        <span class="metric-badge">${analytics.changeRequests.approved} Approved</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Performance</h3>
+                    <div class="metric-number">${analytics.metrics.avgPerformance.toFixed(1)}%</div>
+                    <div class="metric-detail">
+                        <span class="metric-badge">${analytics.metrics.onTarget} On Target</span>
+                        <span class="metric-badge">${analytics.metrics.belowTarget} Below</span>
+                    </div>
+                    <div class="metric-progress">
+                        <div class="metric-progress-fill" style="width: ${analytics.metrics.avgPerformance}%"></div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Compliance</h3>
+                    <div class="metric-number">${analytics.compliance.totalRequirements}</div>
+                    <div class="metric-detail">
+                        <span class="metric-badge">${analytics.compliance.processesWithCompliance} Processes</span>
+                        <span class="metric-badge">Requirements Tracked</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboardMetrics').innerHTML = metricsHtml;
+        }
+
+        async function loadProcesses() {
+            processes = await fetchData('/api/processes');
+            if (processes) {
+                renderProcesses();
+            }
+        }
+
+        function renderProcesses(filteredProcesses = null) {
+            const processesToRender = filteredProcesses || processes;
+            if (!processesToRender) return;
+
+            const processesHtml = processesToRender.map(process => `
+                <div class="process-card" onclick="showProcessDetails('${process.id}')">
+                    <div class="process-header">
+                        <div>
+                            <div class="process-title">${process.name}</div>
+                            <div class="process-meta">
+                                <span class="status ${process.status}">${process.status.replace('_', ' ')}</span>
+                                <span class="risk-level ${process.riskLevel}">${process.riskLevel} risk</span>
+                                <span style="color: #666; font-size: 12px;">v${process.version}</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right; color: #666; font-size: 12px;">
+                            <div>Owner: ${process.owner}</div>
+                            <div>Updated: ${new Date(process.lastModified).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <p style="color: #666; margin-bottom: 15px;">${process.description}</p>
+                    <div style="display: flex; gap: 15px; font-size: 12px; color: #888;">
+                        <span>Category: ${process.category}</span>
+                        <span>Duration: ${process.estimatedDuration}</span>
+                        <span>Frequency: ${process.frequency}</span>
+                    </div>
+                    ${process.complianceRequirements && process.complianceRequirements.length > 0 ? `
+                        <div style="margin-top: 10px;">
+                            <strong style="font-size: 12px; color: #667eea;">Compliance:</strong>
+                            <div style="margin-top: 5px;">
+                                ${process.complianceRequirements.map(req => `
+                                    <span style="background: #e7f3ff; color: #0066cc; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 5px; display: inline-block; margin-bottom: 3px;">
+                                        ${req}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('processesList').innerHTML = processesHtml;
+        }
+
+        function filterProcesses(category) {
+            if (!processes) return;
+            
+            if (category === 'all') {
+                renderProcesses();
+            } else {
+                const filtered = processes.filter(p => p.category === category);
+                renderProcesses(filtered);
+            }
+        }
+
+        async function showProcessDetails(processId) {
+            selectedProcess = processes.find(p => p.id === processId);
+            if (!selectedProcess) return;
+
+            const [steps, metrics, risks] = await Promise.all([
+                fetchData(`/api/processes/${processId}/steps`),
+                fetchData(`/api/processes/${processId}/metrics`),
+                fetchData(`/api/processes/${processId}/risks`)
+            ]);
+
+            const detailsHtml = `
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px;">
+                        <div>
+                            <h2 style="color: #333; margin-bottom: 10px;">${selectedProcess.name}</h2>
+                            <p style="color: #666; font-size: 16px;">${selectedProcess.description}</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn secondary" onclick="generateSOP('${processId}')">Generate SOP</button>
+                            <button class="btn" onclick="editProcess('${processId}')">Edit Process</button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+                        <div>
+                            <h3 style="color: #667eea; margin-bottom: 20px; font-size: 20px;">Process Steps</h3>
+                            <div class="step-list">
+                                ${steps ? steps.map(step => `
+                                    <div class="step-item">
+                                        <div class="step-number">${step.stepNumber}</div>
+                                        <div class="step-content">
+                                            <div class="step-title">${step.name}</div>
+                                            <div class="step-description">${step.description}</div>
+                                            <div class="step-meta">
+                                                <span>Role: ${step.role}</span>
+                                                <span>Time: ${step.estimatedTime}min</span>
+                                                <span>Type: ${step.type}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('') : '<div class="loading">Loading steps</div>'}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="color: #667eea; margin-bottom: 20px; font-size: 20px;">Key Metrics</h3>
+                            ${metrics ? metrics.map(metric => `
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                    <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${metric.name}</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <span style="font-size: 24px; font-weight: bold; color: ${metric.current >= metric.target ? '#28a745' : '#dc3545'};">
+                                            ${metric.current}${metric.unit}
+                                        </span>
+                                        <span style="color: #666; font-size: 14px;">Target: ${metric.target}${metric.unit}</span>
+                                    </div>
+                                    <div class="metric-progress">
+                                        <div class="metric-progress-fill" style="width: ${Math.min((metric.current / metric.target) * 100, 100)}%"></div>
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="loading">Loading metrics</div>'}
+
+                            <h3 style="color: #667eea; margin: 30px 0 20px 0; font-size: 20px;">Risk Assessment</h3>
+                            ${risks ? risks.map(risk => `
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${getRiskColor(risk.riskScore)};">
+                                    <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${risk.title}</div>
+                                    <div style="color: #666; font-size: 14px; margin-bottom: 10px;">${risk.description}</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span class="risk-level ${getRiskLevel(risk.riskScore)}">${getRiskLevel(risk.riskScore)} (${risk.riskScore})</span>
+                                        <span style="color: #666; font-size: 12px;">Owner: ${risk.owner}</span>
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="loading">Loading risks</div>'}
+                        </div>
+                    </div>
+                </div>
+                <button class="btn secondary" onclick="backToProcesses()" style="margin-top: 20px;">← Back to Processes</button>
+            `;
+
+            document.getElementById('processesList').innerHTML = detailsHtml;
+        }
+
+        function getRiskColor(score) {
+            if (score >= 15) return '#dc3545';
+            if (score >= 12) return '#fd7e14';
+            if (score >= 6) return '#ffc107';
+            return '#28a745';
+        }
+
+        function getRiskLevel(score) {
+            if (score >= 15) return 'critical';
+            if (score >= 12) return 'high';
+            if (score >= 6) return 'medium';
+            return 'low';
+        }
+
+        function backToProcesses() {
+            renderProcesses();
+        }
+
+        async function generateSOP(processId) {
+            const sop = await fetchData(`/api/processes/${processId}/sop`);
+            if (sop) {
+                // Create a simple SOP preview
+                const sopWindow = window.open('', '_blank');
+                sopWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>${sop.title}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+                            .section { margin-bottom: 30px; }
+                            .step { margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+                            h1 { color: #333; }
+                            h2 { color: #667eea; margin-top: 30px; }
+                            h3 { color: #555; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>${sop.title}</h1>
+                            <p><strong>Process ID:</strong> ${sop.processId}</p>
+                            <p><strong>Version:</strong> ${sop.version}</p>
+                            <p><strong>Effective Date:</strong> ${new Date(sop.effectiveDate).toLocaleDateString()}</p>
+                            <p><strong>Owner:</strong> ${sop.owner}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Purpose</h2>
+                            <p>${sop.purpose}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Scope</h2>
+                            <p>${sop.scope}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Responsibilities</h2>
+                            <ul>
+                                ${sop.responsibilities.map(role => `<li>${role}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Procedures</h2>
+                            ${sop.procedures.map(step => `
+                                <div class="step">
+                                    <h3>Step ${step.stepNumber}: ${step.title}</h3>
+                                    <p><strong>Description:</strong> ${step.description}</p>
+                                    <p><strong>Responsible Role:</strong> ${step.role}</p>
+                                    <p><strong>Estimated Time:</strong> ${step.estimatedTime}</p>
+                                    ${step.complianceNotes ? `<p><strong>Compliance Notes:</strong> ${step.complianceNotes}</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Compliance Requirements</h2>
+                            <ul>
+                                ${sop.complianceRequirements.map(req => `<li>${req}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <p style="margin-top: 50px; text-align: center; color: #666; font-size: 12px;">
+                            Generated on ${new Date(sop.generatedAt).toLocaleString()}
+                        </p>
+                    </body>
+                    </html>
+                `);
+            }
+        }
+
+        async function loadOptimization() {
+            if (!processes) {
+                processes = await fetchData('/api/processes');
+            }
+
+            let optimizationHtml = '';
+            
+            for (const process of processes) {
+                const suggestions = await fetchData(`/api/processes/${process.id}/optimization`);
+                if (suggestions && suggestions.length > 0) {
+                    optimizationHtml += `
+                        <div class="optimization-suggestions">
+                            <h3 style="color: #333; margin-bottom: 15px;">${process.name}</h3>
+                            ${suggestions.map(suggestion => `
+                                <div class="suggestion-item">
+                                    <div class="suggestion-title">${suggestion.title}</div>
+                                    <div class="suggestion-description">${suggestion.description}</div>
+                                    <div class="suggestion-recommendation"><strong>Recommendation:</strong> ${suggestion.recommendation}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+
+            if (!optimizationHtml) {
+                optimizationHtml = '<div style="text-align: center; padding: 40px; color: #666;">No optimization suggestions available at this time.</div>';
+            }
+
+            document.getElementById('optimizationContent').innerHTML = optimizationHtml;
+        }
+
+        async function loadChangeRequests() {
+            changeRequests = await fetchData('/api/change-requests');
+            if (changeRequests) {
+                renderChangeRequests();
+            }
+        }
+
+        function renderChangeRequests() {
+            if (!changeRequests) return;
+
+            const changeRequestsHtml = changeRequests.length > 0 ? `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Process</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Requested By</th>
+                            <th>Target Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${changeRequests.map(cr => `
+                            <tr>
+                                <td>${cr.id}</td>
+                                <td>
+                                    <strong>${cr.title}</strong><br>
+                                    <small style="color: #666;">${cr.description.substring(0, 60)}...</small>
+                                </td>
+                                <td>${cr.processId}</td>
+                                <td><span class="status ${cr.priority}">${cr.priority}</span></td>
+                                <td><span class="status ${cr.status}">${cr.status.replace('_', ' ')}</span></td>
+                                <td>${cr.requestedBy}</td>
+                                <td>${cr.targetImplementation ? new Date(cr.targetImplementation).toLocaleDateString() : 'TBD'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '<div class="loading">No change requests found</div>';
+
+            document.getElementById('changeRequestsList').innerHTML = changeRequestsHtml;
+        }
+
+        async function loadCompliance() {
+            if (!processes) {
+                processes = await fetchData('/api/processes');
+            }
+
+            const complianceMap = {};
+            processes.forEach(process => {
+                if (process.complianceRequirements) {
+                    process.complianceRequirements.forEach(req => {
+                        if (!complianceMap[req]) {
+                            complianceMap[req] = [];
+                        }
+                        complianceMap[req].push(process);
+                    });
+                }
+            });
+
+            const complianceHtml = Object.entries(complianceMap).map(([requirement, relatedProcesses]) => `
+                <div style="background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">${requirement}</h3>
+                    <p style="color: #666; margin-bottom: 15px;">This requirement is tracked across ${relatedProcesses.length} process(es):</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${relatedProcesses.map(process => `
+                            <span style="background: #e7f3ff; color: #0066cc; padding: 8px 12px; border-radius: 20px; font-size: 14px; cursor: pointer;" onclick="showProcessDetails('${process.id}')">
+                                ${process.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('complianceContent').innerHTML = complianceHtml || '<div class="loading">No compliance requirements found</div>';
+        }
+
+        function showNewProcessForm() {
+            alert('New Process Form - This would open a form to create a new process');
+        }
+
+        function showNewChangeRequestForm() {
+            alert('New Change Request Form - This would open a form to create a new change request');
+        }
+
+        function editProcess(processId) {
+            alert(`Edit Process ${processId} - This would open an editor for the process`);
+        }
+
+        // Initialize the application
+        loadDashboard();
+    </script>
+</body>
+</html>

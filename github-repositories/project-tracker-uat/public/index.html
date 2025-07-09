@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker & UAT Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .nav-tab:hover {
+            color: #1e40af;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3b82f6;
+        }
+
+        .metric-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .metric-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .metric-detail {
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            gap: 15px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .panel-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .panel-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .panel-content {
+            padding: 25px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table th,
+        .table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status.completed { background: #dcfce7; color: #166534; }
+        .status.in_progress { background: #dbeafe; color: #1d4ed8; }
+        .status.planning { background: #fef3c7; color: #92400e; }
+        .status.on_hold { background: #fecaca; color: #dc2626; }
+        .status.approved { background: #dcfce7; color: #166534; }
+        .status.pending { background: #fef3c7; color: #92400e; }
+        .status.passed { background: #dcfce7; color: #166534; }
+        .status.failed { background: #fecaca; color: #dc2626; }
+        .status.not_executed { background: #f1f5f9; color: #475569; }
+
+        .priority {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority.high { background: #fecaca; color: #dc2626; }
+        .priority.medium { background: #fef3c7; color: #92400e; }
+        .priority.low { background: #dcfce7; color: #166534; }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+
+        .btn.secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn.success {
+            background: #10b981;
+        }
+
+        .btn.success:hover {
+            background: #059669;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s ease;
+        }
+
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .risk-category {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .risk-high {
+            background: #fecaca;
+            border: 2px solid #dc2626;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+        }
+
+        .risk-low {
+            background: #dcfce7;
+            border: 2px solid #10b981;
+        }
+
+        .requirement-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .requirement-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .requirement-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .acceptance-criteria {
+            margin-top: 15px;
+        }
+
+        .acceptance-criteria ul {
+            padding-left: 20px;
+        }
+
+        .acceptance-criteria li {
+            margin-bottom: 5px;
+            color: #475569;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .feedback-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            display: inline-flex;
+            gap: 3px;
+            margin-left: 10px;
+        }
+
+        .star {
+            color: #fbbf24;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Project Tracker & UAT Management</h1>
+            <p>Comprehensive project lifecycle management with business requirements and user acceptance testing</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="showTab('projects')">Projects</button>
+            <button class="nav-tab" onclick="showTab('requirements')">Requirements</button>
+            <button class="nav-tab" onclick="showTab('testing')">Test Cases</button>
+            <button class="nav-tab" onclick="showTab('uat')">UAT Sessions</button>
+            <button class="nav-tab" onclick="showTab('risks')">Risk Management</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid" id="dashboardMetrics">
+                <div class="loading">Loading analytics...</div>
+            </div>
+
+            <div class="content-grid">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Active Projects</h2>
+                        <p>Currently running projects and their status</p>
+                    </div>
+                    <div class="panel-content" id="activeProjects">
+                        <div class="loading">Loading projects...</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Risk Overview</h2>
+                        <p>Current risk distribution across projects</p>
+                    </div>
+                    <div class="panel-content" id="riskOverview">
+                        <div class="loading">Loading risks...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projects" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Project Portfolio</h2>
+                    <p>All projects with their current status and progress</p>
+                </div>
+                <div class="panel-content" id="projectsList">
+                    <div class="loading">Loading projects...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements Tab -->
+        <div id="requirements" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Business Requirements</h2>
+                    <p>Requirements documentation and traceability</p>
+                </div>
+                <div class="panel-content" id="requirementsList">
+                    <div class="loading">Loading requirements...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Tab -->
+        <div id="testing" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Test Case Management</h2>
+                    <p>Test cases and execution status</p>
+                </div>
+                <div class="panel-content" id="testCasesList">
+                    <div class="loading">Loading test cases...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UAT Tab -->
+        <div id="uat" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>User Acceptance Testing</h2>
+                    <p>UAT sessions and participant feedback</p>
+                </div>
+                <div class="panel-content" id="uatSessionsList">
+                    <div class="loading">Loading UAT sessions...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risks Tab -->
+        <div id="risks" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Risk Register</h2>
+                    <p>Project risks with mitigation strategies</p>
+                </div>
+                <div class="panel-content" id="risksList">
+                    <div class="loading">Loading risks...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analytics = null;
+        let projects = null;
+        let requirements = null;
+        let testCases = null;
+        let uatSessions = null;
+        let risks = null;
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                const result = await response.json();
+                return result.success ? result.data : null;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        async function loadAllData() {
+            [analytics, projects, requirements, testCases, uatSessions, risks] = await Promise.all([
+                fetchData('/api/dashboard/analytics'),
+                fetchData('/api/projects'),
+                fetchData('/api/requirements'),
+                fetchData('/api/test-cases'),
+                fetchData('/api/uat-sessions'),
+                fetchData('/api/risks')
+            ]);
+            
+            renderDashboard();
+            renderProjects();
+            renderRequirements();
+            renderTestCases();
+            renderUATSessions();
+            renderRisks();
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function renderDashboard() {
+            if (!analytics) return;
+
+            const metricsHtml = `
+                <div class="metric-card">
+                    <h3>Projects</h3>
+                    <div class="metric-number">${analytics.projects.total}</div>
+                    <div class="metric-detail">
+                        <span>${analytics.projects.active} Active</span>
+                        <span>${analytics.projects.completed} Completed</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Requirements</h3>
+                    <div class="metric-number">${analytics.requirements.total}</div>
+                    <div class="metric-detail">
+                        <span>${analytics.requirements.approved} Approved</span>
+                        <span>${analytics.requirements.inProgress} In Progress</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Test Pass Rate</h3>
+                    <div class="metric-number">${analytics.testing.passRate.toFixed(1)}%</div>
+                    <div class="metric-detail">
+                        <span>${analytics.testing.passed} Passed</span>
+                        <span>${analytics.testing.failed} Failed</span>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Budget Utilization</h3>
+                    <div class="metric-number">${analytics.budget.utilizationRate.toFixed(1)}%</div>
+                    <div class="metric-detail">
+                        <span>$${(analytics.budget.totalSpent / 1000000).toFixed(1)}M Spent</span>
+                        <span>$${(analytics.budget.totalBudget / 1000000).toFixed(1)}M Total</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboardMetrics').innerHTML = metricsHtml;
+
+            // Render active projects
+            const activeProjectsHtml = projects ? projects.filter(p => p.status === 'in_progress').map(project => `
+                <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: #1e293b;">${project.name}</h4>
+                        <span class="status ${project.status}">${project.status.replace('_', ' ')}</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">${project.description}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(project.spentBudget / project.budget * 100)}%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748b;">
+                        <span>Budget: ${((project.spentBudget / project.budget) * 100).toFixed(1)}%</span>
+                        <span>PM: ${project.projectManager}</span>
+                    </div>
+                </div>
+            `).join('') : '<div class="loading">No active projects</div>';
+
+            document.getElementById('activeProjects').innerHTML = activeProjectsHtml;
+
+            // Render risk overview
+            const riskOverviewHtml = analytics ? `
+                <div class="risk-matrix">
+                    <div class="risk-category risk-high">
+                        <h4>High Risk</h4>
+                        <div style="font-size: 24px; font-weight: bold; margin-top: 10px;">${analytics.risks.high}</div>
+                    </div>
+                    <div class="risk-category risk-medium">
+                        <h4>Medium Risk</h4>
+                        <div style="font-size: 24px; font-weight: bold; margin-top: 10px;">${analytics.risks.medium}</div>
+                    </div>
+                    <div class="risk-category risk-low">
+                        <h4>Low Risk</h4>
+                        <div style="font-size: 24px; font-weight: bold; margin-top: 10px;">${analytics.risks.low}</div>
+                    </div>
+                </div>
+            ` : '<div class="loading">Loading risks...</div>';
+
+            document.getElementById('riskOverview').innerHTML = riskOverviewHtml;
+        }
+
+        function renderProjects() {
+            if (!projects) return;
+
+            const projectsHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Status</th>
+                            <th>Phase</th>
+                            <th>Priority</th>
+                            <th>Budget Progress</th>
+                            <th>Project Manager</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${projects.map(project => `
+                            <tr>
+                                <td>
+                                    <strong>${project.name}</strong><br>
+                                    <small style="color: #64748b;">${project.description.substring(0, 60)}...</small>
+                                </td>
+                                <td><span class="status ${project.status}">${project.status.replace('_', ' ')}</span></td>
+                                <td><span class="priority ${project.priority}">${project.phase}</span></td>
+                                <td><span class="priority ${project.priority}">${project.priority}</span></td>
+                                <td>
+                                    <div class="progress-bar" style="width: 100px;">
+                                        <div class="progress-fill" style="width: ${(project.spentBudget / project.budget * 100)}%"></div>
+                                    </div>
+                                    <small>${((project.spentBudget / project.budget) * 100).toFixed(1)}%</small>
+                                </td>
+                                <td>${project.projectManager}</td>
+                                <td>${new Date(project.endDate).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('projectsList').innerHTML = projectsHtml;
+        }
+
+        function renderRequirements() {
+            if (!requirements) return;
+
+            const requirementsHtml = requirements.map(req => `
+                <div class="requirement-card">
+                    <div class="requirement-header">
+                        <div>
+                            <div class="requirement-title">${req.title}</div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span class="status ${req.status}">${req.status}</span>
+                                <span class="priority ${req.priority}">${req.priority}</span>
+                                <small style="color: #64748b;">${req.type} • ${req.source}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: #475569; margin: 10px 0;">${req.description}</p>
+                    <div style="display: flex; gap: 20px; font-size: 14px; color: #64748b;">
+                        <span>Effort: ${req.estimatedEffort}h</span>
+                        <span>Project: ${req.projectId}</span>
+                        <span>Modified: ${new Date(req.lastModified).toLocaleDateString()}</span>
+                    </div>
+                    <div class="acceptance-criteria">
+                        <strong>Acceptance Criteria:</strong>
+                        <ul>
+                            ${req.acceptanceCriteria.map(criteria => `<li>${criteria}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('requirementsList').innerHTML = requirementsHtml;
+        }
+
+        function renderTestCases() {
+            if (!testCases) return;
+
+            const testCasesHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Test Case</th>
+                            <th>Requirement</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Executed By</th>
+                            <th>Execution Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${testCases.map(tc => `
+                            <tr>
+                                <td>
+                                    <strong>${tc.title}</strong><br>
+                                    <small style="color: #64748b;">${tc.description.substring(0, 50)}...</small>
+                                </td>
+                                <td>${tc.requirementId}</td>
+                                <td><span class="priority ${tc.priority}">${tc.priority}</span></td>
+                                <td><span class="status ${tc.status}">${tc.status.replace('_', ' ')}</span></td>
+                                <td>${tc.executedBy || 'Not executed'}</td>
+                                <td>${tc.executedAt ? new Date(tc.executedAt).toLocaleDateString() : '-'}</td>
+                                <td>${tc.notes ? tc.notes.substring(0, 40) + '...' : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('testCasesList').innerHTML = testCasesHtml;
+        }
+
+        function renderUATSessions() {
+            if (!uatSessions) return;
+
+            const uatSessionsHtml = uatSessions.map(uat => `
+                <div class="requirement-card">
+                    <div class="requirement-header">
+                        <div>
+                            <div class="requirement-title">${uat.name}</div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                                <span class="status ${uat.status}">${uat.status.replace('_', ' ')}</span>
+                                ${uat.approved ? '<span class="status approved">Approved</span>' : '<span class="status pending">Pending Approval</span>'}
+                                ${uat.overallRating ? `<div class="rating">${'★'.repeat(Math.floor(uat.overallRating))}${'☆'.repeat(5 - Math.floor(uat.overallRating))}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: #475569; margin: 10px 0;">${uat.description}</p>
+                    <div style="display: flex; gap: 20px; font-size: 14px; color: #64748b; margin-bottom: 15px;">
+                        <span>Duration: ${uat.startDate} to ${uat.endDate}</span>
+                        <span>Participants: ${uat.participants.length}</span>
+                        <span>Test Cases: ${uat.testCases.length}</span>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Participants:</strong>
+                        <div style="margin-top: 5px;">
+                            ${uat.participants.map(p => `
+                                <span style="display: inline-block; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; margin: 2px; font-size: 12px;">
+                                    ${p.name} (${p.role})
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${uat.feedback.length > 0 ? `
+                        <div style="margin-top: 15px;">
+                            <strong>Feedback:</strong>
+                            ${uat.feedback.map(f => `
+                                <div class="feedback-card">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong>${f.participant}</strong>
+                                        <div class="rating">${'★'.repeat(f.rating)}${'☆'.repeat(5 - f.rating)}</div>
+                                    </div>
+                                    <p style="margin: 5px 0;">${f.comments}</p>
+                                    ${f.issues.length > 0 ? `
+                                        <div style="margin-top: 5px;">
+                                            <small style="color: #dc2626;">Issues: ${f.issues.join(', ')}</small>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('uatSessionsList').innerHTML = uatSessionsHtml;
+        }
+
+        function renderRisks() {
+            if (!risks) return;
+
+            const risksHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Risk</th>
+                            <th>Category</th>
+                            <th>Probability</th>
+                            <th>Impact</th>
+                            <th>Risk Score</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Last Reviewed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${risks.map(risk => `
+                            <tr>
+                                <td>
+                                    <strong>${risk.title}</strong><br>
+                                    <small style="color: #64748b;">${risk.description.substring(0, 60)}...</small>
+                                </td>
+                                <td>${risk.category}</td>
+                                <td><span class="priority ${risk.probability}">${risk.probability}</span></td>
+                                <td><span class="priority ${risk.impact}">${risk.impact}</span></td>
+                                <td>
+                                    <span class="priority ${risk.riskScore >= 15 ? 'high' : risk.riskScore >= 9 ? 'medium' : 'low'}">
+                                        ${risk.riskScore}
+                                    </span>
+                                </td>
+                                <td><span class="status ${risk.status}">${risk.status}</span></td>
+                                <td>${risk.owner}</td>
+                                <td>${new Date(risk.lastReviewed).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('risksList').innerHTML = risksHtml;
+        }
+
+        // Initialize the application
+        loadAllData();
+        
+        // Auto refresh every 30 seconds
+        setInterval(loadAllData, 30000);
+    </script>
+</body>
+</html>
