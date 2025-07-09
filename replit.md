@@ -7,6 +7,7 @@ This repository contains 5 comprehensive portfolio projects designed to demonstr
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+User interface: Display user's full name everywhere, capitalize job titles.
 
 ## Portfolio Projects
 
@@ -14,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Purpose**: Real-time monitoring and analytics for municipal water systems
 - **Skills Demonstrated**: Dashboard development, data visualization, real-time monitoring
 - **Port**: 5000 (main application)
-- **Status**: ✓ Complete with comprehensive testing
+- **Status**: ✓ Complete with authentication, user management, and interactive features
 
 ### Project 2: ERP/CRM Mock Integration Tool  
 - **Purpose**: Demonstrates integration between CRM and ERP systems via mock APIs

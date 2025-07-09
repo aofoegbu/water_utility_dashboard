@@ -120,7 +120,7 @@ export default function Dashboard() {
                         {user?.email || 'user@example.com'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {user?.role || 'Analyst'} • {user?.department || 'Water Utility'}
+                        {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Analyst'} • {user?.department || 'Water Utility'}
                       </p>
                     </div>
                   </DropdownMenuLabel>

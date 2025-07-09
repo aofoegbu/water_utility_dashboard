@@ -80,7 +80,7 @@ export default function Sidebar() {
               {user?.fullName || user?.username || 'User'}
             </p>
             <p className="text-xs text-gray-500">
-              {user?.role || 'Analyst'}
+              {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Analyst'}
             </p>
           </div>
         </div>
