@@ -753,6 +753,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed data endpoint
+  app.post("/api/seed-data", async (req: Request, res: Response) => {
+    try {
+      const { seedDatabase } = await import("./seed-data");
+      await seedDatabase();
+      res.json({ success: true, message: "Database seeded successfully!" });
+    } catch (error) {
+      console.error("Seed data error:", error);
+      res.status(500).json({ message: "Failed to seed database", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
