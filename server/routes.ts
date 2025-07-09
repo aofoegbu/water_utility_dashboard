@@ -25,14 +25,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-here',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Create session for unauthenticated users
     cookie: {
       secure: false, // Set to true in production with HTTPS
-      httpOnly: true,
+      httpOnly: true, // Keep httpOnly for security
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax', // Important for development
-    },
-    name: 'connect.sid'
+      sameSite: 'lax', // Lax is better for same-origin
+      domain: undefined, // Don't set domain for localhost
+    }
   }));
 
   // Authentication middleware

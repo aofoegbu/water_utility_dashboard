@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Test</title>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testUser()">Test Get User</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 'Login: ' + JSON.stringify(data);
+                console.log('Login response:', data);
+                console.log('Cookies after login:', document.cookie);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Login error: ' + error.message;
+                console.error('Login error:', error);
+            }
+        }
+
+        async function testUser() {
+            try {
+                const response = await fetch('/api/auth/user', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('result').innerHTML = 'User: ' + JSON.stringify(data);
+                    console.log('User response:', data);
+                } else {
+                    document.getElementById('result').innerHTML = 'User error: ' + response.status + ' ' + response.statusText;
+                }
+                console.log('Cookies during user check:', document.cookie);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'User error: ' + error.message;
+                console.error('User error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
