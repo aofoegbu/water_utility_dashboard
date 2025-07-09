@@ -765,6 +765,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SQL Report Generator API routes
+  app.post("/api/sql/execute", async (req: Request, res: Response) => {
+    try {
+      const { sql } = req.body;
+      
+      if (!sql || typeof sql !== 'string') {
+        return res.status(400).json({ message: "SQL query is required" });
+      }
+
+      // Security: only allow SELECT queries
+      const cleanSql = sql.trim().toLowerCase();
+      if (!cleanSql.startsWith('select')) {
+        return res.status(400).json({ message: "Only SELECT queries are allowed for security reasons" });
+      }
+
+      // Execute directly with PostgreSQL
+      const { db } = await import("./db");
+      const startTime = Date.now();
+      
+      const result = await db.execute(sql);
+      const executionTime = Date.now() - startTime;
+
+      // Convert result to expected format
+      const columns = result.fields?.map(field => field.name) || [];
+      const rows = result.rows || [];
+
+      res.json({
+        columns,
+        rows,
+        rowCount: rows.length,
+        executionTime
+      });
+    } catch (error) {
+      console.error("SQL execution error:", error);
+      res.status(400).json({ 
+        message: "SQL execution failed", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/sql/export/:format", async (req: Request, res: Response) => {
+    try {
+      const { format } = req.params;
+      const { data, columns } = req.body;
+      
+      if (!data || !columns) {
+        return res.status(400).json({ message: "Data and columns are required for export" });
+      }
+
+      if (format === 'csv') {
+        // Simple CSV generation
+        const csvHeader = columns.join(',');
+        const csvRows = data.map((row: any) => 
+          columns.map((col: string) => {
+            const value = row[col];
+            if (value === null || value === undefined) return '';
+            return `"${String(value).replace(/"/g, '""')}"`;
+          }).join(',')
+        );
+        const csv = [csvHeader, ...csvRows].join('\n');
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="query_result.csv"');
+        res.send(csv);
+      } else if (format === 'json') {
+        const json = JSON.stringify(data, null, 2);
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename="query_result.json"');
+        res.send(json);
+      } else {
+        res.status(400).json({ message: "Unsupported format. Use 'csv' or 'json'" });
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

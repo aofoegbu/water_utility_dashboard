@@ -13,6 +13,7 @@ import CustomersPage from "@/pages/customers";
 import ProjectsPage from "@/pages/projects";
 import TestPage from "@/pages/test";
 import LoginPage from "@/pages/login";
+import SqlGenerator from "@/pages/sql-generator";
 import NotFound from "@/pages/not-found";
 import Chatbot from "@/components/chatbot/chatbot";
 
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/reports" component={ReportsPage} />
       <Route path="/customers" component={CustomersPage} />
       <Route path="/projects" component={ProjectsPage} />
+      <Route path="/sql-reports" component={SqlGenerator} />
       <Route path="/test" component={TestPage} />
       <Route path="/login" component={LoginPage} />
       <Route component={NotFound} />

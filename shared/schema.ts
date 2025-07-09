@@ -304,6 +304,70 @@ export const insertRiskAssessmentSchema = createInsertSchema(riskAssessments).om
 
 export const insertCostEstimateSchema = createInsertSchema(costEstimates).omit({ id: true, createdAt: true });
 
+// SQL Report Generator tables
+export const sqlQueries = pgTable("sql_queries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  sql: text("sql").notNull(),
+  category: text("category").notNull().default("custom"), // custom, template, report
+  tags: text("tags").array().default([]),
+  isTemplate: boolean("is_template").default(false),
+  createdBy: text("created_by").notNull(),
+  lastExecuted: timestamp("last_executed"),
+  executionCount: integer("execution_count").default(0),
+  isFavorite: boolean("is_favorite").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const queryExecutions = pgTable("query_executions", {
+  id: serial("id").primaryKey(),
+  queryId: integer("query_id"),
+  executedBy: text("executed_by").notNull(),
+  sql: text("sql").notNull(),
+  status: text("status").notNull(), // success, error, timeout
+  rowCount: integer("row_count"),
+  executionTime: integer("execution_time"), // milliseconds
+  errorMessage: text("error_message"),
+  parameters: jsonb("parameters"),
+  executedAt: timestamp("executed_at").defaultNow(),
+});
+
+export const reportSchedules = pgTable("report_schedules", {
+  id: serial("id").primaryKey(),
+  queryId: integer("query_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  frequency: text("frequency").notNull(), // daily, weekly, monthly, quarterly
+  format: text("format").notNull().default("csv"), // csv, json, pdf, excel
+  recipients: text("recipients").array().default([]),
+  isActive: boolean("is_active").default(true),
+  lastRun: timestamp("last_run"),
+  nextRun: timestamp("next_run"),
+  createdBy: text("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const queryTemplates = pgTable("query_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  sql: text("sql").notNull(),
+  category: text("category").notNull(),
+  parameters: jsonb("parameters"), // parameters for dynamic queries
+  tags: text("tags").array().default([]),
+  difficulty: text("difficulty").default("beginner"), // beginner, intermediate, advanced
+  estimatedRows: integer("estimated_rows"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for SQL Report Generator
+export const insertSqlQuerySchema = createInsertSchema(sqlQueries).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertQueryExecutionSchema = createInsertSchema(queryExecutions).omit({ id: true, executedAt: true });
+export const insertReportScheduleSchema = createInsertSchema(reportSchedules).omit({ id: true, createdAt: true });
+export const insertQueryTemplateSchema = createInsertSchema(queryTemplates).omit({ id: true, createdAt: true });
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -335,3 +399,13 @@ export type RiskAssessment = typeof riskAssessments.$inferSelect;
 export type InsertRiskAssessment = z.infer<typeof insertRiskAssessmentSchema>;
 export type CostEstimate = typeof costEstimates.$inferSelect;
 export type InsertCostEstimate = z.infer<typeof insertCostEstimateSchema>;
+
+// SQL Report Generator types
+export type SqlQuery = typeof sqlQueries.$inferSelect;
+export type InsertSqlQuery = z.infer<typeof insertSqlQuerySchema>;
+export type QueryExecution = typeof queryExecutions.$inferSelect;
+export type InsertQueryExecution = z.infer<typeof insertQueryExecutionSchema>;
+export type ReportSchedule = typeof reportSchedules.$inferSelect;
+export type InsertReportSchedule = z.infer<typeof insertReportScheduleSchema>;
+export type QueryTemplate = typeof queryTemplates.$inferSelect;
+export type InsertQueryTemplate = z.infer<typeof insertQueryTemplateSchema>;

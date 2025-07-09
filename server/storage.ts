@@ -1,13 +1,16 @@
 import { 
   users, waterUsage, leaks, maintenance, alerts, activities,
   projects, requirements, testCases, uatSessions, stakeholders, riskAssessments, costEstimates,
+  sqlQueries, queryExecutions, queryTemplates,
   type User, type InsertUser, type WaterUsage, type InsertWaterUsage,
   type Leak, type InsertLeak, type Maintenance, type InsertMaintenance,
   type Alert, type InsertAlert, type Activity, type InsertActivity,
   type Project, type InsertProject, type Requirement, type InsertRequirement,
   type TestCase, type InsertTestCase, type UatSession, type InsertUatSession,
   type Stakeholder, type InsertStakeholder, type RiskAssessment, type InsertRiskAssessment,
-  type CostEstimate, type InsertCostEstimate
+  type CostEstimate, type InsertCostEstimate,
+  type SqlQuery, type InsertSqlQuery, type QueryExecution, type InsertQueryExecution,
+  type QueryTemplate, type InsertQueryTemplate
 } from "@shared/schema";
 
 export interface IStorage {
@@ -94,6 +97,16 @@ export interface IStorage {
     totalActual: number;
     byCategory: Array<{ category: string; estimated: number; actual: number }>;
   }>;
+
+  // SQL Report Generator
+  getSqlQueries(): Promise<SqlQuery[]>;
+  getSqlQuery(id: number): Promise<SqlQuery | undefined>;
+  createSqlQuery(query: InsertSqlQuery): Promise<SqlQuery>;
+  getSqlQueryTemplates(): Promise<QueryTemplate[]>;
+  createQueryExecution(execution: InsertQueryExecution): Promise<QueryExecution>;
+  executeSqlQuery(sql: string): Promise<{ columns: string[]; rows: any[]; rowCount: number }>;
+  getDatabaseSchema(): Promise<Array<{ table: string; columns: Array<{ name: string; type: string; nullable: boolean; primaryKey: boolean }> }>>;
+  exportToCSV(data: any[]): Promise<string>;
 }
 
 export class MemStorage implements IStorage {
@@ -113,6 +126,11 @@ export class MemStorage implements IStorage {
   private riskAssessments: Map<number, RiskAssessment> = new Map();
   private costEstimates: Map<number, CostEstimate> = new Map();
   
+  // SQL Report Generator storage
+  private sqlQueries: Map<number, SqlQuery> = new Map();
+  private queryExecutions: Map<number, QueryExecution> = new Map();
+  private queryTemplates: Map<number, QueryTemplate> = new Map();
+  
   private currentId = 1;
 
   constructor() {
@@ -123,6 +141,7 @@ export class MemStorage implements IStorage {
     // Create sample user
     this.createUser({
       username: "john.analyst",
+      email: "john.analyst@ogelo.com",
       password: "password123",
       role: "analyst",
       fullName: "John Analyst",
