@@ -1,0 +1,82 @@
+Given this job requirements, what simple projects should I include in my personal webpage to make me the best candidate for the job.
+Description
+ABOUT THE ORGANIZATION
+
+Truckee Meadows Water Authority (TMWA) is a not-for-profit, community-owned water utility, overseen by elected officials and citizen appointees from Reno, Sparks and Washoe County. TMWA has a highly skilled workforce who ensure the around-the-clock treatment, delivery and availability of high-quality drinking water for more than 475,000 residents of the Truckee Meadows.
+
+We are looking to hire a MIS ANALYST, to join our TECHNOLOGY Department.
+
+ABOUT THE POSITION
+
+The MIS Analyst works with business partners throughout the organization to align technology solutions with business strategies. Goals of the MIS Analyst include planning, analysis and defining of business/application requirements while acting as the technology Point of Contact (POC) for an assigned area. Incumbents are responsible for developing clear business requirements and functional designs, facilitating work sessions and interacting with a wide variety of staff members from varied backgrounds and disciplines. 
+
+The Associate MIS Analyst supports current operations, existing systems and reports. Incumbents are expected to work on project-related tasks and responds to internal customer issues. Associate MIS Analysts assist in implementing new and supporting existing systems.
+
+The Staff MIS Analyst differs from Associate in that incumbents at the Staff level perform more complex MIS work. Incumbents are recognized as having the experience, certifications and responsibility for making final technical decisions and have influence on the overall outcome of a project or task. This position may also be designated as Project Manager on BIS projects. Staff MIS Analysts perform under general supervision and guidance.
+
+The Senior MIS Analyst differs from Staff MIS Analyst in that incumbents at the Senior level perform significantly more complex MIS management work. Incumbents are recognized in the work group as having the highest authority in a group. Senior level MIS Analysts manage projects including the implementation of entire programs and procedures and perform under minimal supervision and guidance.
+
+Progression from one position title, level, or designation is not automatic nor guaranteed and is based on business need.
+
+
+ESSENTIAL FUNCTIONS
+We believe that each employee makes a significant contribution to our success. That contribution should not be limited by the assigned responsibilities. Therefore, this job description is designed to outline primary duties, qualifications, and job scope, but not limit the incumbent nor TMWA to just the work identified. It is our expectation that each employee will offer his/her services wherever and whenever necessary to ensure the success of our endeavors.
+
+Review, analyze and modify systems including installing, encoding, debugging and testing to support the organizations information systems
+Perform data analysis and generate ad-hoc reports and dashboards
+Provide strong reporting and analytics to support management team
+Provide training and develop/maintain end-user documentation
+Develop and maintain system architecture and other system information
+Research, plan and recommend new software or modifications to existing systems and processes to satisfy business requirements
+Understand customer issues and provide appropriate technical solutions
+Lead and assist the implementation of system modifications, expansions and upgrades
+Lead and assist in the development of design considerations, cost analyses and project timelines
+Conduct task process analysis while interacting with system users to identify opportunities for improvement
+Engage with software vendors and other business partners and act as point-of-contact (POC) for vendors
+Maintain a professional cognizance of tools and techniques needed to improve the quality of service
+Lead the development of business process mapping and workflow diagramming for departmental procedures
+Analyze financial impact of project decisions and make business solution recommendations.
+Deploy new systems, system updates and patches and perform system testing.
+Independently organize workload to meet deadlines
+Explain technical information to a wide variety of individuals in a clear and accurate manner
+MINIMUM REQUIREMENTS
+Any combination of training and experience that would provide the required knowledge, skills, and abilities is qualifying. A typical way to obtain the minimum requirements is:
+
+Education & Training: Bachelor’s degree in MIS, computer science or related fields is required. Either Project Management experience and PMP certification or Business Analysis experience and IIBA CBAP certification is preferred.
+Experience:  Three to Ten years experience (depending on level of MIS work performed) in all aspects of Business Analysis. Significant experience with SQL queries is required. Previous experience supporting Business Intelligence systems, ERP or CRM systems is preferred. System Integration experience, particularly through the use of APIs, is preferred.
+
+Must have working-level knowledge of the English language including reading, writing, and speaking English.
+
+CERTIFICATIONS, LICENSURE & SPECIAL REQUIREMENTS
+
+A valid Nevada (or California – depending on state of residency) Driver License at time of hire and continuing thereafter and ability to maintain insurability under TMWA’s vehicle insurance policy.
+
+Employment is contingent upon successful completion of a background investigation during hire and periodically thereafter during employment.
+
+This position is considered a safety sensitive position and employment is contingent upon the results of drug and/or alcohol testing which includes screening for marijuana. The presence of marijuana or other screened for substances on any employment related substance test may result in a refusal to hire or termination of employment.
+
+KNOWLEDGE, SKILLS, AND ABILITIES
+Knowledge of:
+
+Project management principles
+Business analysis principles
+Various programming languages, scripting tools and development approaches
+Data Lakes/Lakehouses/Warehouses and ETL tools and techniques
+Software testing tools and techniques
+System performance analysis and workflow management
+CX, UX and UI
+Best practice techniques, methodologies and tools
+Skill/Ability to:
+Lead software implementation projects
+Collect and analyze business requirements to identify problems and recommend solutions
+Set work priorities and assign project work to other team members
+Create effective oral and written materials and presentations
+Identification, analysis and documentation of support issues
+Use the tools and techniques required for the optimization of queries and reports
+Process improvement and modeling
+Define UAT plans including authoring test cases
+Business Intelligence tools
+Multitask and reprioritize work in a dynamic production environment
+Strong teamwork, coordination, and cross-department collaboration skills
+Understand complex database systems
+Stakeholder management and meeting facilitation
