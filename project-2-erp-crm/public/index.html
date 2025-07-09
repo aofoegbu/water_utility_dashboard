@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP/CRM Integration Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .stat-detail {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+
+        .btn.secondary:hover {
+            background: #4b5563;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            padding: 20px 20px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            color: #1e293b;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .panel-content {
+            padding: 0 20px 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .table td {
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .log-entry {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .log-timestamp {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ERP/CRM Integration Dashboard</h1>
+            <p>Monitor and manage system integrations between CRM and ERP platforms</p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="loading">Loading statistics...</div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="syncData('sync_customers')">Sync Customers</button>
+            <button class="btn" onclick="syncData('sync_work_orders')">Sync Work Orders</button>
+            <button class="btn" onclick="syncData('full_sync')">Full Sync</button>
+            <button class="btn secondary" onclick="refreshData()">Refresh Data</button>
+        </div>
+
+        <div class="content-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Recent Integration Logs</h2>
+                </div>
+                <div class="panel-content" id="integrationLogs">
+                    <div class="loading">Loading logs...</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Active Work Orders</h2>
+                </div>
+                <div class="panel-content" id="workOrders">
+                    <div class="loading">Loading work orders...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statsData = null;
+        let logsData = null;
+        let workOrdersData = null;
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                const result = await response.json();
+                return result.success ? result.data : null;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        async function loadStats() {
+            statsData = await fetchData('/api/dashboard/stats');
+            if (statsData) {
+                renderStats();
+            }
+        }
+
+        async function loadLogs() {
+            logsData = await fetchData('/api/integration/logs');
+            if (logsData) {
+                renderLogs();
+            }
+        }
+
+        async function loadWorkOrders() {
+            workOrdersData = await fetchData('/api/erp/work-orders');
+            if (workOrdersData) {
+                renderWorkOrders();
+            }
+        }
+
+        function renderStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>Customers</h3>
+                    <div class="stat-number">${statsData.customers.total}</div>
+                    <div class="stat-detail">${statsData.customers.active} active</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Open Tickets</h3>
+                    <div class="stat-number">${statsData.tickets.open}</div>
+                    <div class="stat-detail">${statsData.tickets.inProgress} in progress</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Work Orders</h3>
+                    <div class="stat-number">${statsData.workOrders.total}</div>
+                    <div class="stat-detail">${statsData.workOrders.pending} pending</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Integration Health</h3>
+                    <div class="stat-number">${statsData.integration.successfulOperations}</div>
+                    <div class="stat-detail">${statsData.integration.errors} errors</div>
+                </div>
+            `;
+        }
+
+        function renderLogs() {
+            const logsContainer = document.getElementById('integrationLogs');
+            
+            if (!logsData || logsData.length === 0) {
+                logsContainer.innerHTML = '<div class="loading">No logs available</div>';
+                return;
+            }
+
+            const logsHtml = logsData.slice(0, 10).map(log => {
+                const statusClass = log.status === 'success' ? 'success' : 'error';
+                return `
+                    <div class="log-entry">
+                        <div class="log-timestamp">${new Date(log.timestamp).toLocaleString()}</div>
+                        <div>
+                            <span class="status ${statusClass}">${log.status}</span>
+                            ${log.operation} - ${log.message}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            logsContainer.innerHTML = logsHtml;
+        }
+
+        function renderWorkOrders() {
+            const workOrdersContainer = document.getElementById('workOrders');
+            
+            if (!workOrdersData || workOrdersData.length === 0) {
+                workOrdersContainer.innerHTML = '<div class="loading">No work orders available</div>';
+                return;
+            }
+
+            const activeOrders = workOrdersData.filter(wo => wo.status !== 'completed');
+            
+            const ordersHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Technician</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${activeOrders.slice(0, 8).map(order => {
+                            const statusClass = order.status === 'completed' ? 'success' : 
+                                              order.status === 'in_progress' ? 'warning' : 'info';
+                            return `
+                                <tr>
+                                    <td>${order.id}</td>
+                                    <td>${order.priority}</td>
+                                    <td><span class="status ${statusClass}">${order.status}</span></td>
+                                    <td>${order.assignedTechnician}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            workOrdersContainer.innerHTML = ordersHtml;
+        }
+
+        async function syncData(operation) {
+            try {
+                const response = await fetch('/api/integration/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ operation })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Sync completed: ${result.data.message}`);
+                    refreshData();
+                } else {
+                    alert(`Sync failed: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`Sync error: ${error.message}`);
+            }
+        }
+
+        async function refreshData() {
+            await Promise.all([loadStats(), loadLogs(), loadWorkOrders()]);
+        }
+
+        // Initial load and auto-refresh
+        refreshData();
+        setInterval(refreshData, 30000); // Refresh every 30 seconds
+    </script>
+</body>
+</html>

@@ -160,7 +160,8 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
     const user: User = { 
-      ...insertUser, 
+      ...insertUser,
+      role: insertUser.role || "analyst",
       id, 
       createdAt: new Date() 
     };
@@ -188,7 +189,12 @@ export class MemStorage implements IStorage {
 
   async createWaterUsage(usage: InsertWaterUsage): Promise<WaterUsage> {
     const id = this.currentId++;
-    const newUsage: WaterUsage = { ...usage, id };
+    const newUsage: WaterUsage = { 
+      ...usage, 
+      id,
+      temperature: usage.temperature || null,
+      qualityMetrics: usage.qualityMetrics || null
+    };
     this.waterUsage.set(id, newUsage);
     return newUsage;
   }
@@ -225,7 +231,15 @@ export class MemStorage implements IStorage {
 
   async createLeak(leak: InsertLeak): Promise<Leak> {
     const id = this.currentId++;
-    const newLeak: Leak = { ...leak, id };
+    const newLeak: Leak = { 
+      ...leak, 
+      id,
+      status: leak.status || "active",
+      resolvedAt: leak.resolvedAt || null,
+      estimatedGallonsLost: leak.estimatedGallonsLost || null,
+      assignedTechnician: leak.assignedTechnician || null,
+      notes: leak.notes || null
+    };
     this.leaks.set(id, newLeak);
     
     // Create alert for new leak
@@ -273,7 +287,15 @@ export class MemStorage implements IStorage {
 
   async createMaintenance(task: InsertMaintenance): Promise<Maintenance> {
     const id = this.currentId++;
-    const newTask: Maintenance = { ...task, id };
+    const newTask: Maintenance = { 
+      ...task, 
+      id,
+      status: task.status || "pending",
+      completedDate: task.completedDate || null,
+      estimatedDuration: task.estimatedDuration || null,
+      notes: task.notes || null,
+      cost: task.cost || null
+    };
     this.maintenance.set(id, newTask);
     return newTask;
   }
@@ -305,7 +327,12 @@ export class MemStorage implements IStorage {
 
   async createAlert(alert: InsertAlert): Promise<Alert> {
     const id = this.currentId++;
-    const newAlert: Alert = { ...alert, id };
+    const newAlert: Alert = { 
+      ...alert, 
+      id,
+      isRead: alert.isRead || false,
+      resolvedAt: alert.resolvedAt || null
+    };
     this.alerts.set(id, newAlert);
     return newAlert;
   }
@@ -330,7 +357,12 @@ export class MemStorage implements IStorage {
 
   async createActivity(activity: InsertActivity): Promise<Activity> {
     const id = this.currentId++;
-    const newActivity: Activity = { ...activity, id };
+    const newActivity: Activity = { 
+      ...activity, 
+      id,
+      technician: activity.technician || null,
+      details: activity.details || null
+    };
     this.activities.set(id, newActivity);
     return newActivity;
   }
