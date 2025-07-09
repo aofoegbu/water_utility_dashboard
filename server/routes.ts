@@ -1,10 +1,142 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema } from "@shared/schema";
+import { insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema, loginSchema, registerSchema } from "@shared/schema";
 import { generatePDFReport, generateCSVReport } from "./services/report-generator";
+import bcrypt from "bcrypt";
+import session from "express-session";
+
+// Session configuration
+declare module 'express-session' {
+  interface SessionData {
+    user: {
+      id: number;
+      username: string;
+      email: string;
+      role: string;
+      fullName: string;
+      department: string;
+    };
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  }));
+
+  // Authentication middleware
+  const requireAuth = (req: Request, res: Response, next: any) => {
+    if (!req.session.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    next();
+  };
+
+  // Authentication routes
+  app.post('/api/auth/register', async (req: Request, res: Response) => {
+    try {
+      const validatedData = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'User already exists with this email' });
+      }
+
+      const existingUsername = await storage.getUserByUsername(validatedData.username);
+      if (existingUsername) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      
+      // Create user
+      const user = await storage.createUser({
+        ...validatedData,
+        password: hashedPassword,
+        role: 'analyst'
+      });
+
+      // Remove password from response
+      const { password, ...userWithoutPassword } = user;
+      
+      // Set session
+      req.session.user = userWithoutPassword;
+      
+      res.status(201).json({ 
+        message: 'User registered successfully',
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(400).json({ 
+        message: 'Registration failed',
+        details: error instanceof Error ? error.message : error 
+      });
+    }
+  });
+
+  app.post('/api/auth/login', async (req: Request, res: Response) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // Check password
+      const validPassword = await bcrypt.compare(validatedData.password, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // Remove password from user object
+      const { password, ...userWithoutPassword } = user;
+      
+      // Set session
+      req.session.user = userWithoutPassword;
+      
+      res.json({ 
+        message: 'Login successful',
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(400).json({ 
+        message: 'Login failed',
+        details: error instanceof Error ? error.message : error 
+      });
+    }
+  });
+
+  app.post('/api/auth/logout', (req: Request, res: Response) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Logout failed' });
+      }
+      res.json({ message: 'Logout successful' });
+    });
+  });
+
+  app.get('/api/auth/user', (req: Request, res: Response) => {
+    if (req.session.user) {
+      res.json(req.session.user);
+    } else {
+      res.status(401).json({ message: 'Not authenticated' });
+    }
+  });
   
   // Dashboard KPI endpoints
   app.get("/api/dashboard/kpis", async (req: Request, res: Response) => {

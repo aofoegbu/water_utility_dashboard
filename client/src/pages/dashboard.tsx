@@ -2,19 +2,29 @@ import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/dashboard/sidebar";
 import KPICards from "@/components/dashboard/kpi-cards";
 import UsageChart from "@/components/dashboard/usage-chart";
-import SystemMap from "@/components/dashboard/system-map";
+import SystemStatusMap from "@/components/dashboard/system-status-map";
 import AlertsPanel from "@/components/dashboard/alerts-panel";
 import MaintenanceSchedule from "@/components/dashboard/maintenance-schedule";
 import QuickActions from "@/components/dashboard/quick-actions";
-import ActivityTable from "@/components/dashboard/activity-table";
+import RecentActivity from "@/components/dashboard/recent-activity";
 import ReportModal from "@/components/dashboard/report-modal";
 import { useState } from "react";
-import { Bell, Download } from "lucide-react";
+import { Bell, Download, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const { data: kpis, isLoading: kpisLoading, error: kpisError } = useQuery({
     queryKey: ["/api/dashboard/kpis"],
@@ -93,6 +103,31 @@ export default function Dashboard() {
                 <Download className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user?.fullName || 'User'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email || 'user@example.com'}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
@@ -104,7 +139,7 @@ export default function Dashboard() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <UsageChart />
-            <SystemMap />
+            <SystemStatusMap />
           </div>
 
           {/* Data Panels Row */}
@@ -115,7 +150,7 @@ export default function Dashboard() {
           </div>
 
           {/* Activity Table */}
-          <ActivityTable />
+          <RecentActivity />
         </main>
       </div>
 

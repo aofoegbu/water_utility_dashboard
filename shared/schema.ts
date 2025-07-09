@@ -6,6 +6,7 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").notNull().default("analyst"), // analyst, supervisor, admin
   fullName: text("full_name").notNull(),
@@ -79,6 +80,20 @@ export const activities = pgTable("activities", {
 
 // Create insert schemas with string dates that will be converted to Date objects
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+
+// Authentication schemas
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const registerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  fullName: z.string().min(1, "Full name is required"),
+  department: z.string().min(1, "Department is required"),
+});
 export const insertWaterUsageSchema = createInsertSchema(waterUsage).omit({ id: true }).extend({
   timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
 });
@@ -101,6 +116,8 @@ export const insertActivitySchema = createInsertSchema(activities).omit({ id: tr
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
 export type WaterUsage = typeof waterUsage.$inferSelect;
 export type InsertWaterUsage = z.infer<typeof insertWaterUsageSchema>;
 export type Leak = typeof leaks.$inferSelect;
