@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema, loginSchema, registerSchema } from "@shared/schema";
+import { insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema, insertActivitySchema, loginSchema, registerSchema } from "@shared/schema";
 import { generatePDFReport, generateCSVReport } from "./services/report-generator";
 import bcrypt from "bcrypt";
 import session from "express-session";
@@ -204,7 +204,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/water-usage", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertWaterUsageSchema.parse(req.body);
+      const processedData = {
+        ...req.body,
+        timestamp: req.body.timestamp || new Date()
+      };
+      
+      const validatedData = insertWaterUsageSchema.parse(processedData);
       const usage = await storage.createWaterUsage(validatedData);
       res.status(201).json(usage);
     } catch (error) {
@@ -262,7 +267,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/leaks", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertLeakSchema.parse(req.body);
+      const processedData = {
+        ...req.body,
+        detectedAt: req.body.detectedAt || new Date(),
+        resolvedAt: req.body.resolvedAt || null
+      };
+      
+      const validatedData = insertLeakSchema.parse(processedData);
       const leak = await storage.createLeak(validatedData);
       res.status(201).json(leak);
     } catch (error) {
@@ -314,7 +325,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertMaintenanceSchema.parse(req.body);
+      const processedData = {
+        ...req.body,
+        scheduledDate: req.body.scheduledDate || new Date(),
+        completedDate: req.body.completedDate || null
+      };
+      
+      const validatedData = insertMaintenanceSchema.parse(processedData);
       const task = await storage.createMaintenance(validatedData);
       res.status(201).json(task);
     } catch (error) {
@@ -370,7 +387,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/alerts", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertAlertSchema.parse(req.body);
+      const processedData = {
+        ...req.body,
+        timestamp: req.body.timestamp || new Date(),
+        resolvedAt: req.body.resolvedAt || null
+      };
+      
+      const validatedData = insertAlertSchema.parse(processedData);
       const alert = await storage.createAlert(validatedData);
       res.status(201).json(alert);
     } catch (error) {
@@ -399,6 +422,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(activities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch activities" });
+    }
+  });
+
+  app.post("/api/activities", async (req: Request, res: Response) => {
+    try {
+      const processedData = {
+        ...req.body,
+        timestamp: req.body.timestamp || new Date()
+      };
+      
+      const validatedData = insertActivitySchema.parse(processedData);
+      const activity = await storage.createActivity(validatedData);
+      res.status(201).json(activity);
+    } catch (error) {
+      console.error("Activity validation error:", error);
+      res.status(400).json({ message: "Invalid activity data", details: error instanceof Error ? error.message : error });
     }
   });
 

@@ -770,6 +770,57 @@ app.get('/api/reports/dashboard', (req, res) => {
 });
 
 // Generate integration report
+app.get('/api/reports/integration', (req, res) => {
+  // Default 7-day report for GET request
+  const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const endDate = new Date().toISOString();
+  const format = 'json';
+  
+  // Use same logic as POST
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  const filtered = integrationLogs.filter(log => {
+    const logDate = new Date(log.timestamp);
+    return logDate >= start && logDate <= end;
+  });
+  
+  const report = {
+    period: {
+      start: start.toISOString(),
+      end: end.toISOString()
+    },
+    summary: {
+      totalOperations: filtered.length,
+      successfulOperations: filtered.filter(log => log.status === 'success').length,
+      failedOperations: filtered.filter(log => log.status === 'failure').length,
+      partialFailures: filtered.filter(log => log.status === 'partial_failure').length,
+      averageDuration: filtered.reduce((sum, log) => sum + log.duration, 0) / filtered.length || 0,
+      totalRecordsProcessed: filtered.reduce((sum, log) => sum + log.recordsProcessed, 0)
+    },
+    operationBreakdown: {
+      customer_sync: filtered.filter(log => log.operation === 'customer_sync').length,
+      ticket_sync: filtered.filter(log => log.operation === 'ticket_sync').length,
+      order_update: filtered.filter(log => log.operation === 'order_update').length,
+      health_check: filtered.filter(log => log.operation === 'health_check').length
+    },
+    systemBreakdown: {
+      CRM: filtered.filter(log => log.source === 'CRM').length,
+      ERP: filtered.filter(log => log.source === 'ERP').length,
+      Integration: filtered.filter(log => log.source === 'Integration').length
+    },
+    logs: filtered
+  };
+  
+  addIntegrationLog('Integration', 'API', 'report_generation', 'success', `Generated integration report for ${report.summary.totalOperations} operations`);
+  
+  res.json({
+    success: true,
+    data: report,
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.post('/api/reports/integration', (req, res) => {
   const { startDate, endDate, format = 'json' } = req.body;
   
@@ -853,7 +904,8 @@ app.use('*', (req, res) => {
       'POST /api/integration/sync',
       'GET /api/integration/health',
       'GET /api/reports/dashboard',
-      'POST /api/reports/integration'
+      'POST /api/reports/integration',
+      'GET /api/reports/integration'
     ],
     timestamp: new Date().toISOString()
   });

@@ -95,22 +95,31 @@ export const registerSchema = z.object({
   department: z.string().min(1, "Department is required"),
 });
 export const insertWaterUsageSchema = createInsertSchema(waterUsage).omit({ id: true }).extend({
-  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
 });
 export const insertLeakSchema = createInsertSchema(leaks).omit({ id: true }).extend({
-  detectedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
-  resolvedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+  detectedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
+  resolvedAt: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (val === null || val === undefined) return null;
+    return typeof val === 'string' ? new Date(val) : val;
+  }).optional()
 });
 export const insertMaintenanceSchema = createInsertSchema(maintenance).omit({ id: true }).extend({
-  scheduledDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
-  completedDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+  scheduledDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
+  completedDate: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (val === null || val === undefined) return null;
+    return typeof val === 'string' ? new Date(val) : val;
+  }).optional()
 });
 export const insertAlertSchema = createInsertSchema(alerts).omit({ id: true }).extend({
-  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
-  resolvedAt: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
+  resolvedAt: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (val === null || val === undefined) return null;
+    return typeof val === 'string' ? new Date(val) : val;
+  }).optional()
 });
 export const insertActivitySchema = createInsertSchema(activities).omit({ id: true }).extend({
-  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
+  timestamp: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val).optional()
 });
 
 // Export types

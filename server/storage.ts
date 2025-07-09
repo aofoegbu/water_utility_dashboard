@@ -557,6 +557,7 @@ export class DatabaseStorage implements IStorage {
       .insert(maintenance)
       .values({
         ...task,
+        scheduledDate: task.scheduledDate || new Date(),
         status: task.status || "pending",
         completedDate: task.completedDate || null,
         estimatedDuration: task.estimatedDuration || null,
@@ -605,6 +606,7 @@ export class DatabaseStorage implements IStorage {
       .insert(alerts)
       .values({
         ...alert,
+        timestamp: alert.timestamp || new Date(),
         isRead: alert.isRead || false,
         resolvedAt: alert.resolvedAt || null
       })
@@ -641,6 +643,7 @@ export class DatabaseStorage implements IStorage {
       .insert(activities)
       .values({
         ...activity,
+        timestamp: activity.timestamp || new Date(),
         technician: activity.technician || null,
         details: activity.details || null
       })
