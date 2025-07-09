@@ -327,6 +327,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+      
+      console.log('Maintenance update request:', { id, updates });
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid maintenance task ID" });
+      }
+      
       const task = await storage.updateMaintenance(id, updates);
       
       if (!task) {
@@ -335,7 +342,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(task);
     } catch (error) {
-      res.status(400).json({ message: "Failed to update maintenance task" });
+      console.error('Maintenance update error:', error);
+      res.status(400).json({ 
+        message: "Failed to update maintenance task",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

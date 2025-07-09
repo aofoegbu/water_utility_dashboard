@@ -18,8 +18,12 @@ export default function MaintenanceSchedule() {
     mutationFn: ({ id, updates }: { id: number; updates: any }) =>
       apiRequest("PATCH", `/api/maintenance/${id}`, updates),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/maintenance/today"] });
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/kpis"] });
+    },
+    onError: (error) => {
+      console.error('Failed to update maintenance task:', error);
     }
   });
 

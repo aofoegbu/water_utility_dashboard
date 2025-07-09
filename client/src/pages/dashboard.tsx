@@ -114,10 +114,13 @@ export default function Dashboard() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {user?.fullName || 'User'}
+                        {user?.fullName || user?.username || 'User'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user?.email || 'user@example.com'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.role || 'Analyst'} • {user?.department || 'Water Utility'}
                       </p>
                     </div>
                   </DropdownMenuLabel>
