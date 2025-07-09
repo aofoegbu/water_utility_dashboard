@@ -23,6 +23,10 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "augustineogelo1@gmail.com",
+      password: "99ogelo1010"
+    }
   });
 
   const loginMutation = useMutation({

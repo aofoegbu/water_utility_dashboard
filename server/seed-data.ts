@@ -16,6 +16,14 @@ export async function seedDatabase() {
     // Seed users
     const sampleUsers = [
       {
+        username: "Ogelo",
+        email: "augustineogelo1@gmail.com",
+        password: "99ogelo1010", // In production, this would be hashed
+        role: "analyst" as const,
+        fullName: "Augustine Ogelo",
+        department: "Water Operations"
+      },
+      {
         username: "admin",
         password: "admin123", // In production, this would be hashed
         role: "admin" as const,
