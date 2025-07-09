@@ -28,6 +28,7 @@ This full-stack application demonstrates advanced skills in dashboard developmen
 - **Report Generation** - Automated PDF/CSV reports with customizable date ranges
 - **Customer Management** - Service account tracking and billing integration
 - **Activity Logging** - Comprehensive audit trail of all system events
+- **AI-Powered Chatbot Assistant** - Instant utility operations support and troubleshooting guidance
 
 ## 🛠️ Technology Stack
 
@@ -101,6 +102,58 @@ This full-stack application demonstrates advanced skills in dashboard developmen
 - **Dark/Light Mode**: User preference-based theme switching
 - **Interactive Charts**: Drill-down capabilities with hover details
 - **Real-time Updates**: Live data refresh without page reload
+- **Intelligent Assistance**: Built-in chatbot for instant operational guidance
+
+## 🤖 AI Chatbot Assistant
+
+The integrated chatbot provides instant support for water utility operations with specialized knowledge in:
+
+### Expertise Areas
+- **Leak Detection & Emergency Response**
+  - Immediate action protocols for water main breaks
+  - Leak reporting procedures and severity assessment
+  - Emergency contact information and escalation paths
+
+- **Maintenance Operations**
+  - Routine inspection schedules and safety procedures
+  - Equipment maintenance protocols and troubleshooting
+  - Work order management and priority classification
+
+- **Water Quality Management**
+  - EPA compliance standards and testing requirements
+  - pH, chlorine, and turbidity monitoring guidelines
+  - Quality control procedures and corrective actions
+
+- **System Operations**
+  - Pressure monitoring and flow rate optimization
+  - Pump station operations and performance metrics
+  - Distribution system management
+
+- **Regulatory Compliance**
+  - EPA Safe Drinking Water Act requirements
+  - State and local regulatory compliance
+  - Reporting procedures and documentation standards
+
+- **Customer Service**
+  - Standard response procedures and escalation protocols
+  - Billing inquiries and service interruption management
+  - Communication best practices
+
+### How to Use
+1. **Access**: Click the floating blue chat icon in the bottom-right corner
+2. **Quick Start**: Use the suggested questions for common inquiries
+3. **Natural Language**: Ask questions in plain English about any utility operation
+4. **Instant Response**: Get immediate, actionable guidance without waiting
+
+### Sample Questions
+- "How to report a leak?"
+- "What are the water quality standards?"
+- "Emergency procedures for main break"
+- "Maintenance schedules for pumps"
+- "EPA compliance requirements"
+- "Customer complaint procedures"
+
+The chatbot operates entirely offline with no external API dependencies, ensuring 100% availability and zero operating costs.
 
 ## 🚀 Quick Start
 

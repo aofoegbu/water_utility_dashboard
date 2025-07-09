@@ -16,7 +16,7 @@ User interface: Display user's full name everywhere, capitalize job titles.
 - **Skills Demonstrated**: Dashboard development, data visualization, real-time monitoring, authentication systems
 - **Port**: 5000 (main application)
 - **Status**: ✓ Complete with full authentication, user management, interactive maintenance scheduling, and real-time dashboard features
-- **Recent Updates**: Dashboard now displays by default with demo user data (Augustine Ogelo), authentication optional, maintenance task completion tracking, and personalized user interface
+- **Recent Updates**: Dashboard now displays by default with demo user data (Augustine Ogelo), authentication optional, maintenance task completion tracking, personalized user interface, and integrated AI chatbot assistant for utility operations support
 
 ### Project 2: ERP/CRM Mock Integration Tool  
 - **Purpose**: Demonstrates integration between CRM and ERP systems via mock APIs
@@ -69,6 +69,7 @@ User interface: Display user's full name everywhere, capitalize job titles.
 - **Client-side routing** with Wouter
 - **Real-time data updates** via polling with React Query
 - **Dashboard-centric UI** with multiple data visualization components
+- **AI Chatbot Assistant** with rule-based responses for water utility operations
 
 ### Backend Architecture
 - **RESTful API** using Express.js
@@ -102,7 +103,7 @@ The application models a complete water utility system with tables for:
 - **Backend**: Express.js with TypeScript serving REST APIs  
 - **Database**: PostgreSQL with Drizzle ORM, comprehensive schema, automatic seeding
 - **State Management**: TanStack Query for server state
-- **Key Features**: Real-time monitoring, leak detection, maintenance scheduling, report generation
+- **Key Features**: Real-time monitoring, leak detection, maintenance scheduling, report generation, AI chatbot assistant
 
 ### Project 2: ERP/CRM Integration (Node.js/Express)
 - **Technology**: Pure Node.js with Express
@@ -166,4 +167,14 @@ The application models a complete water utility system with tables for:
 - Export capabilities for data portability
 - Role-based access control patterns
 
-The portfolio demonstrates end-to-end capabilities for MIS Analyst role including technical implementation, business process understanding, and water utility domain expertise.
+The portfolio demonstrates end-to-end capabilities for MIS Analyst role including technical implementation, business process understanding, water utility domain expertise, and intelligent automation through AI-powered assistance.
+
+## Recent Changes (Latest Updates)
+
+### January 2025
+- ✅ **AI Chatbot Integration**: Added comprehensive chatbot assistant with water utility expertise
+  - Rule-based system requiring no external APIs or costs
+  - Specialized knowledge in leak detection, maintenance, water quality, compliance, and emergency procedures
+  - Floating chat interface with quick suggestions and natural language processing
+  - Instant responses for operational guidance and troubleshooting
+  - Professional responses covering EPA standards, safety protocols, and best practices
