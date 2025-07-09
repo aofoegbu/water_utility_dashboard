@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
 
-  const { data: kpis, isLoading: kpisLoading } = useQuery({
+  const { data: kpis, isLoading: kpisLoading, error: kpisError } = useQuery({
     queryKey: ["/api/dashboard/kpis"],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -27,11 +27,22 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
+  if (kpisError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading dashboard: {kpisError.message}</p>
+          <p className="text-gray-600">Please check your connection and try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (kpisLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>

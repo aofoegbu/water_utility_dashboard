@@ -24,6 +24,11 @@ export default {
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
+          50: "var(--primary-50)",
+          100: "var(--primary-100)",
+          500: "var(--primary-500)",
+          600: "var(--primary-600)",
+          700: "var(--primary-700)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
@@ -50,6 +55,12 @@ export default {
           "3": "var(--chart-3)",
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
+        },
+        status: {
+          success: "var(--status-success)",
+          warning: "var(--status-warning)",
+          critical: "var(--status-critical)",
+          info: "var(--status-info)",
         },
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
