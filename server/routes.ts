@@ -1,12 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { 
-  insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema, insertActivitySchema, 
-  loginSchema, registerSchema,
-  insertProjectSchema, insertRequirementSchema, insertTestCaseSchema, insertUatSessionSchema,
-  insertStakeholderSchema, insertRiskAssessmentSchema, insertCostEstimateSchema
-} from "@shared/schema";
+import { insertWaterUsageSchema, insertLeakSchema, insertMaintenanceSchema, insertAlertSchema, loginSchema, registerSchema } from "@shared/schema";
 import { generatePDFReport, generateCSVReport } from "./services/report-generator";
 import bcrypt from "bcrypt";
 import session from "express-session";
@@ -209,12 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/water-usage", async (req: Request, res: Response) => {
     try {
-      const processedData = {
-        ...req.body,
-        timestamp: req.body.timestamp || new Date()
-      };
-      
-      const validatedData = insertWaterUsageSchema.parse(processedData);
+      const validatedData = insertWaterUsageSchema.parse(req.body);
       const usage = await storage.createWaterUsage(validatedData);
       res.status(201).json(usage);
     } catch (error) {
@@ -272,13 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/leaks", async (req: Request, res: Response) => {
     try {
-      const processedData = {
-        ...req.body,
-        detectedAt: req.body.detectedAt || new Date(),
-        resolvedAt: req.body.resolvedAt || null
-      };
-      
-      const validatedData = insertLeakSchema.parse(processedData);
+      const validatedData = insertLeakSchema.parse(req.body);
       const leak = await storage.createLeak(validatedData);
       res.status(201).json(leak);
     } catch (error) {
@@ -330,13 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
-      const processedData = {
-        ...req.body,
-        scheduledDate: req.body.scheduledDate || new Date(),
-        completedDate: req.body.completedDate || null
-      };
-      
-      const validatedData = insertMaintenanceSchema.parse(processedData);
+      const validatedData = insertMaintenanceSchema.parse(req.body);
       const task = await storage.createMaintenance(validatedData);
       res.status(201).json(task);
     } catch (error) {
@@ -392,13 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/alerts", async (req: Request, res: Response) => {
     try {
-      const processedData = {
-        ...req.body,
-        timestamp: req.body.timestamp || new Date(),
-        resolvedAt: req.body.resolvedAt || null
-      };
-      
-      const validatedData = insertAlertSchema.parse(processedData);
+      const validatedData = insertAlertSchema.parse(req.body);
       const alert = await storage.createAlert(validatedData);
       res.status(201).json(alert);
     } catch (error) {
@@ -427,292 +399,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(activities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch activities" });
-    }
-  });
-
-  app.post("/api/activities", async (req: Request, res: Response) => {
-    try {
-      const processedData = {
-        ...req.body,
-        timestamp: req.body.timestamp || new Date()
-      };
-      
-      const validatedData = insertActivitySchema.parse(processedData);
-      const activity = await storage.createActivity(validatedData);
-      res.status(201).json(activity);
-    } catch (error) {
-      console.error("Activity validation error:", error);
-      res.status(400).json({ message: "Invalid activity data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  // ===== PROJECT MANAGEMENT ROUTES =====
-  
-  // Projects endpoints
-  app.get("/api/projects", async (req: Request, res: Response) => {
-    try {
-      const projects = await storage.getProjects();
-      res.json(projects);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch projects" });
-    }
-  });
-
-  app.get("/api/projects/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      res.json(project);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch project" });
-    }
-  });
-
-  app.post("/api/projects", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertProjectSchema.parse(req.body);
-      const project = await storage.createProject(validatedData);
-      res.status(201).json(project);
-    } catch (error) {
-      console.error("Project validation error:", error);
-      res.status(400).json({ message: "Invalid project data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/projects/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateProject(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update project" });
-    }
-  });
-
-  // Requirements endpoints
-  app.get("/api/requirements", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.query;
-      const requirements = await storage.getRequirements(projectId as string);
-      res.json(requirements);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch requirements" });
-    }
-  });
-
-  app.post("/api/requirements", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertRequirementSchema.parse(req.body);
-      const requirement = await storage.createRequirement(validatedData);
-      res.status(201).json(requirement);
-    } catch (error) {
-      console.error("Requirement validation error:", error);
-      res.status(400).json({ message: "Invalid requirement data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/requirements/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateRequirement(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Requirement not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update requirement" });
-    }
-  });
-
-  // Test cases endpoints
-  app.get("/api/test-cases", async (req: Request, res: Response) => {
-    try {
-      const { projectId, requirementId } = req.query;
-      const testCases = await storage.getTestCases(projectId as string, requirementId as string);
-      res.json(testCases);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch test cases" });
-    }
-  });
-
-  app.post("/api/test-cases", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertTestCaseSchema.parse(req.body);
-      const testCase = await storage.createTestCase(validatedData);
-      res.status(201).json(testCase);
-    } catch (error) {
-      console.error("Test case validation error:", error);
-      res.status(400).json({ message: "Invalid test case data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/test-cases/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateTestCase(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Test case not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update test case" });
-    }
-  });
-
-  // UAT sessions endpoints
-  app.get("/api/uat-sessions", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.query;
-      const sessions = await storage.getUatSessions(projectId as string);
-      res.json(sessions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch UAT sessions" });
-    }
-  });
-
-  app.post("/api/uat-sessions", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertUatSessionSchema.parse(req.body);
-      const session = await storage.createUatSession(validatedData);
-      res.status(201).json(session);
-    } catch (error) {
-      console.error("UAT session validation error:", error);
-      res.status(400).json({ message: "Invalid UAT session data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/uat-sessions/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateUatSession(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "UAT session not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update UAT session" });
-    }
-  });
-
-  // Stakeholders endpoints
-  app.get("/api/stakeholders", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.query;
-      const stakeholders = await storage.getStakeholders(projectId as string);
-      res.json(stakeholders);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch stakeholders" });
-    }
-  });
-
-  app.post("/api/stakeholders", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertStakeholderSchema.parse(req.body);
-      const stakeholder = await storage.createStakeholder(validatedData);
-      res.status(201).json(stakeholder);
-    } catch (error) {
-      console.error("Stakeholder validation error:", error);
-      res.status(400).json({ message: "Invalid stakeholder data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/stakeholders/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateStakeholder(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Stakeholder not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update stakeholder" });
-    }
-  });
-
-  // Risk assessments endpoints
-  app.get("/api/risks", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.query;
-      const risks = await storage.getRiskAssessments(projectId as string);
-      res.json(risks);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch risk assessments" });
-    }
-  });
-
-  app.post("/api/risks", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertRiskAssessmentSchema.parse(req.body);
-      const risk = await storage.createRiskAssessment(validatedData);
-      res.status(201).json(risk);
-    } catch (error) {
-      console.error("Risk assessment validation error:", error);
-      res.status(400).json({ message: "Invalid risk data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/risks/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateRiskAssessment(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Risk assessment not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update risk assessment" });
-    }
-  });
-
-  // Cost estimates endpoints
-  app.get("/api/cost-estimates", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.query;
-      const estimates = await storage.getCostEstimates(projectId as string);
-      res.json(estimates);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch cost estimates" });
-    }
-  });
-
-  app.post("/api/cost-estimates", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertCostEstimateSchema.parse(req.body);
-      const estimate = await storage.createCostEstimate(validatedData);
-      res.status(201).json(estimate);
-    } catch (error) {
-      console.error("Cost estimate validation error:", error);
-      res.status(400).json({ message: "Invalid cost estimate data", details: error instanceof Error ? error.message : error });
-    }
-  });
-
-  app.patch("/api/cost-estimates/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updated = await storage.updateCostEstimate(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ message: "Cost estimate not found" });
-      }
-      res.json(updated);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update cost estimate" });
-    }
-  });
-
-  // Project cost summary endpoint
-  app.get("/api/projects/:projectId/cost-summary", async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.params;
-      const costSummary = await storage.getProjectCostSummary(projectId);
-      res.json(costSummary);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch project cost summary" });
     }
   });
 
@@ -750,97 +436,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(reportData);
     } catch (error) {
       res.status(500).json({ message: "Failed to generate report" });
-    }
-  });
-
-  // Seed data endpoint
-  app.post("/api/seed-data", async (req: Request, res: Response) => {
-    try {
-      const { seedDatabase } = await import("./seed-data");
-      await seedDatabase();
-      res.json({ success: true, message: "Database seeded successfully!" });
-    } catch (error) {
-      console.error("Seed data error:", error);
-      res.status(500).json({ message: "Failed to seed database", error: error.message });
-    }
-  });
-
-  // SQL Report Generator API routes
-  app.post("/api/sql/execute", async (req: Request, res: Response) => {
-    try {
-      const { sql } = req.body;
-      
-      if (!sql || typeof sql !== 'string') {
-        return res.status(400).json({ message: "SQL query is required" });
-      }
-
-      // Security: only allow SELECT queries
-      const cleanSql = sql.trim().toLowerCase();
-      if (!cleanSql.startsWith('select')) {
-        return res.status(400).json({ message: "Only SELECT queries are allowed for security reasons" });
-      }
-
-      // Execute directly with PostgreSQL
-      const { db } = await import("./db");
-      const startTime = Date.now();
-      
-      const result = await db.execute(sql);
-      const executionTime = Date.now() - startTime;
-
-      // Convert result to expected format
-      const columns = result.fields?.map(field => field.name) || [];
-      const rows = result.rows || [];
-
-      res.json({
-        columns,
-        rows,
-        rowCount: rows.length,
-        executionTime
-      });
-    } catch (error) {
-      console.error("SQL execution error:", error);
-      res.status(400).json({ 
-        message: "SQL execution failed", 
-        error: error.message 
-      });
-    }
-  });
-
-  app.post("/api/sql/export/:format", async (req: Request, res: Response) => {
-    try {
-      const { format } = req.params;
-      const { data, columns } = req.body;
-      
-      if (!data || !columns) {
-        return res.status(400).json({ message: "Data and columns are required for export" });
-      }
-
-      if (format === 'csv') {
-        // Simple CSV generation
-        const csvHeader = columns.join(',');
-        const csvRows = data.map((row: any) => 
-          columns.map((col: string) => {
-            const value = row[col];
-            if (value === null || value === undefined) return '';
-            return `"${String(value).replace(/"/g, '""')}"`;
-          }).join(',')
-        );
-        const csv = [csvHeader, ...csvRows].join('\n');
-        
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename="query_result.csv"');
-        res.send(csv);
-      } else if (format === 'json') {
-        const json = JSON.stringify(data, null, 2);
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', 'attachment; filename="query_result.json"');
-        res.send(json);
-      } else {
-        res.status(400).json({ message: "Unsupported format. Use 'csv' or 'json'" });
-      }
-    } catch (error) {
-      console.error("Export error:", error);
-      res.status(500).json({ message: "Failed to export data" });
     }
   });
 
