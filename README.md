@@ -2,11 +2,11 @@
 
 A comprehensive real-time water utility management system providing operational intelligence, infrastructure monitoring, and advanced reporting capabilities for municipal water operations.
 
-## 🚀 Live Demo
+## 🚀 Link: https://water-utility-tracker-augustineogelo.replit.app/ 
 
 The dashboard is immediately accessible without login requirements - simply open the application to explore all features with live demo data.
 
-![Ogelo Water Utility Dashboard](screenshots/dashboard-preview.svg)
+![Ogelo Water Utility Dashboard](screenshots/dashboard-preview.png)
 
 **Demo User Profile:**
 - **Name:** Augustine Ogelo
