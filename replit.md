@@ -1,47 +1,60 @@
-# Ogelo MIS Analyst Portfolio Projects - replit.md
+# Augustine Ogelo MIS Analyst Portfolio - replit.md
 
 ## Overview
 
-This repository contains 5 comprehensive portfolio projects designed to demonstrate qualifications for a MIS Analyst position. The projects showcase business analyst and technical skills including SQL expertise, business intelligence, utility operations knowledge, and integration capabilities.
+This repository contains **5 independent, standalone projects** designed to demonstrate comprehensive qualifications for a MIS Analyst position. Each project is completely separate and can be deployed independently, showcasing different aspects of business analysis, technical implementation, and domain expertise.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 User interface: Display user's full name everywhere, capitalize job titles.
 
-## Portfolio Projects
+## Independent Portfolio Projects
 
 ### Project 1: Water Utility Dashboard
+- **Location**: `water-utility-dashboard/` folder
 - **Purpose**: Real-time monitoring and analytics for municipal water systems
-- **Skills Demonstrated**: Dashboard development, data visualization, real-time monitoring, authentication systems
-- **Port**: 5000 (main application)
-- **Status**: ✓ Complete with full authentication, user management, interactive maintenance scheduling, and real-time dashboard features
-- **Recent Updates**: Dashboard now displays by default with demo user data (Augustine Ogelo), authentication optional, maintenance task completion tracking, personalized user interface, and integrated AI chatbot assistant for utility operations support
+- **Skills Demonstrated**: Full-stack development, PostgreSQL integration, real-time dashboards, SQL expertise
+- **Port**: 5000
+- **Tech Stack**: React + TypeScript + Node.js + PostgreSQL + Drizzle ORM
+- **Status**: ✓ Complete standalone application
+- **Features**: SQL Report Generator with visual query builder, leak detection, maintenance scheduling, authentication system
 
-### Project 2: ERP/CRM Mock Integration Tool  
-- **Purpose**: Demonstrates integration between CRM and ERP systems via mock APIs
-- **Skills Demonstrated**: System integration, API design, error handling, enterprise workflows
+### Project 2: ERP/CRM Integration Tool
+- **Location**: `erp-crm-integration/` folder
+- **Purpose**: Mock enterprise system integration with real-time monitoring
+- **Skills Demonstrated**: API integration, system synchronization, enterprise workflows, health monitoring
 - **Port**: 3000
-- **Status**: ✓ Complete with comprehensive dashboard, real-time monitoring, and automated testing
-- **Recent Updates**: Full enterprise integration simulation with CRM/ERP sync, ticket management, maintenance scheduling, system health monitoring, and comprehensive test suite
+- **Tech Stack**: Node.js + Express + In-Memory Storage
+- **Status**: ✓ Complete standalone application
+- **Features**: CRM/ERP system simulation, integration logging, customer sync, work order automation
 
-### Project 3: Project Tracker with Business Requirements & UAT Support
-- **Purpose**: Comprehensive project lifecycle management with UAT tracking
-- **Skills Demonstrated**: Project management, requirements gathering, UAT planning
-- **Port**: 4000  
-- **Status**: ✓ Complete with full project lifecycle support
+### Project 3: Project Tracker with UAT Support
+- **Location**: `project-tracker-uat/` folder
+- **Purpose**: Complete project lifecycle management and UAT coordination
+- **Skills Demonstrated**: Business analysis, requirements gathering, stakeholder management, UAT planning
+- **Port**: 4000
+- **Tech Stack**: Node.js + Express + Moment.js
+- **Status**: ✓ Complete standalone application
+- **Features**: Requirements documentation, test case management, risk assessment, UAT session tracking
 
 ### Project 4: SQL Report Generator
-- **Purpose**: Advanced SQL query execution and reporting tool
-- **Skills Demonstrated**: SQL expertise, report generation, query optimization
-- **Port**: 5000 (SQL Generator)
-- **Status**: ✓ Complete with query builder and export capabilities
+- **Location**: `sql-report-generator/` folder
+- **Purpose**: Advanced SQL execution engine with query building capabilities
+- **Skills Demonstrated**: SQL expertise, query optimization, report generation, data export
+- **Port**: 5500
+- **Tech Stack**: Node.js + Express + SQLite + ExcelJS
+- **Status**: ✓ Complete standalone application
+- **Features**: Query templates, performance tracking, CSV/JSON export, embedded database
 
 ### Project 5: Business Process Mapper
-- **Purpose**: Business process documentation, analysis, and optimization
-- **Skills Demonstrated**: Process analysis, workflow optimization, compliance tracking
+- **Location**: `business-process-mapper/` folder
+- **Purpose**: Process documentation, analysis, and optimization tools
+- **Skills Demonstrated**: Process analysis, workflow design, compliance tracking, SOP generation
 - **Port**: 6000
-- **Status**: ✓ Complete with process modeling and SOP generation
+- **Tech Stack**: Node.js + Express + Canvas + UUID
+- **Status**: ✓ Complete standalone application
+- **Features**: Process modeling, optimization analysis, change management, diagram generation
 
 ## System Architecture
 
