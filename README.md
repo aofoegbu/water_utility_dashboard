@@ -7,7 +7,7 @@ A comprehensive real-time water utility management system providing operational 
 The dashboard is immediately accessible without login requirements - simply open the application to explore all features with live demo data.
 
 ![Ogelo Water Utility Dashboard](screenshots/dashboard-preview.png)
-
+ 
 **Demo User Profile:**
 - **Name:** Augustine Ogelo
 - **Email:** augustineogelo1@gmail.com
